@@ -19,7 +19,7 @@ st.set_page_config(
     page_title="Toorese | Portfolio",
     page_icon="⚡",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # --- SESSION STATE INITIALIZATION ---
@@ -539,178 +539,231 @@ elif page == "Projects":
     # ------------------------------------------------------------------
     # PROJECT 1: SUPERSTORE SALES (EXECUTIVE INTELLIGENCE SUITE)
     # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
+    # PROJECT 1: SUPERSTORE SALES (COMPLETE EXECUTIVE SUITE)
+    # ------------------------------------------------------------------
     if "Superstore Sales" in project:
+        from plotly.subplots import make_subplots
         
         # 1. LOAD DATA
         df = load_data("sales.csv")
         df.columns = df.columns.str.strip()
         
-        # Ensure Date Types
+        # Ensure Types
         date_col = next((c for c in df.columns if 'date' in c.lower()), 'Order Date')
         df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
+        if 'Ship Mode' not in df.columns: df['Ship Mode'] = np.random.choice(['Standard', 'Second', 'First'], len(df))
+        if 'Discount' not in df.columns: df['Discount'] = np.random.uniform(0, 0.4, len(df))
+        if 'Customer Name' not in df.columns: df['Customer Name'] = [f"Cust {i}" for i in np.random.randint(1, 500, len(df))]
+
+        # --- THEME CONFIG ---
+        BG_COLOR = "#0B132B"
+        CARD_COLOR = "#1C2541"
+        TEXT_COLOR = "#E0E0E0"
+        GOLD = "#D4AF37"
+        CREAM = "#F0F8FF"
         
-        # Ensure Ship Mode exists
-        if 'Ship Mode' not in df.columns: 
-            df['Ship Mode'] = np.random.choice(['Standard Class', 'Second Class', 'First Class'], len(df))
+        # --- CASCADING CONTROL PANEL ---
+        c_title, c_filter = st.columns([3, 1])
         
-        # --- HEADER & CONTEXT ---
-        st.markdown("""
-            <div style='background: linear-gradient(to right, #0066ff, #00ccff); padding: 20px; border-radius: 10px; margin-bottom: 20px;'>
-                <h1 style='color:white; margin:0; font-family:"Segoe UI", sans-serif;'>EXECUTIVE SALES INTELLIGENCE SUITE</h1>
-                <p style='color:#e0f7fa; margin:0; font-size:0.9rem;'>AI-DRIVEN COMMERCE ANALYTICS & STRATEGY CONSOLE</p>
-            </div>
+        with c_filter:
+            st.markdown(f"<div style='background:{CARD_COLOR}; padding:15px; border-radius:10px; border:1px solid #333;'>", unsafe_allow_html=True)
+            st.markdown(f"<div style='color:{GOLD}; font-weight:bold; margin-bottom:5px;'>🔍 FILTER STACK</div>", unsafe_allow_html=True)
+            
+            # 1. REGION (Multi-Select & Searchable)
+            all_regions = sorted(df['Region'].unique().tolist()) if 'Region' in df.columns else []
+            sel_region = st.multiselect("Region:", all_regions, placeholder="Select Regions...")
+            
+            # Data Step 1
+            df_r = df[df['Region'].isin(sel_region)] if sel_region else df
+            
+            # 2. STATE (Dependent on Region)
+            avail_states = sorted(df_r['State'].unique().tolist())
+            sel_state = st.multiselect("State:", avail_states, placeholder="Select States...")
+            
+            # Data Step 2
+            df_s = df_r[df_r['State'].isin(sel_state)] if sel_state else df_r
+            
+            # 3. CITY (Dependent on State)
+            avail_cities = sorted(df_s['City'].unique().tolist()) if 'City' in df_s.columns else []
+            sel_city = st.multiselect("City:", avail_cities, placeholder="Select Cities...")
+            
+            # Final Data Step
+            df_viz = df_s[df_s['City'].isin(sel_city)] if sel_city else df_s
+            
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        # --- DYNAMIC TITLE LOGIC ---
+        if sel_city:
+            display_count = len(sel_city)
+            name = f"{display_count} CITIES" if display_count > 2 else ", ".join(sel_city).upper()
+            title_text = f"FOCUS: <span style='color:{GOLD}'>{name}</span>"
+        elif sel_state:
+            display_count = len(sel_state)
+            name = f"{display_count} STATES" if display_count > 2 else ", ".join(sel_state).upper()
+            title_text = f"FOCUS: <span style='color:{GOLD}'>{name}</span>"
+        elif sel_region:
+            display_count = len(sel_region)
+            name = f"{display_count} REGIONS" if display_count > 2 else ", ".join(sel_region).upper()
+            title_text = f"FOCUS: <span style='color:{GOLD}'>{name}</span>"
+        else:
+            title_text = "GLOBAL SALES PERFORMANCE DASHBOARD"
+
+        with c_title:
+            st.markdown(f"<h2 style='color:{TEXT_COLOR}; margin-top:0;'>{title_text}</h2>", unsafe_allow_html=True)
+
+        st.markdown("---")
+
+        # --- AGGREGATIONS ---
+        total_sales = df_viz['Sales'].sum()
+        total_profit = df_viz['Profit'].sum()
+        margin = (total_profit / total_sales) * 100 if total_sales > 0 else 0
+        total_orders = len(df_viz)
+        
+        # --- KPI CARDS ---
+        st.markdown(f"""
+        <style>
+            .kpi-box {{ background-color: {CARD_COLOR}; border-left: 4px solid {GOLD}; padding: 15px; border-radius: 5px; text-align: center; }}
+            .kpi-lbl {{ color: #888; font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; }}
+            .kpi-val {{ color: {GOLD}; font-size: 1.6rem; font-weight: 700; margin-top: 5px; }}
+        </style>
         """, unsafe_allow_html=True)
-
-        # --- GLOBAL FILTERS ---
-        with st.expander("🔎 STRATEGIC FILTER CONTROLS", expanded=True):
-            f1, f2, f3 = st.columns(3)
-            
-            regions = ['All'] + sorted(df['Region'].unique().tolist()) if 'Region' in df.columns else ['All']
-            cats = ['All'] + sorted(df['Category'].unique().tolist()) if 'Category' in df.columns else ['All']
-            ships = ['All'] + sorted(df['Ship Mode'].unique().tolist())
-            
-            with f1: sel_region = st.selectbox("Region Scope:", regions)
-            with f2: sel_cat = st.selectbox("Category Scope:", cats)
-            with f3: sel_ship = st.selectbox("Logistics Channel:", ships)
-
-        # Filter Logic
-        df_filtered = df.copy()
-        if sel_region != 'All': df_filtered = df_filtered[df_filtered['Region'] == sel_region]
-        if sel_cat != 'All': df_filtered = df_filtered[df_filtered['Category'] == sel_cat]
-        if sel_ship != 'All': df_filtered = df_filtered[df_filtered['Ship Mode'] == sel_ship]
-
-        # --- SMART INSIGHTS BAR ---
-        # Calculate a quick insight
-        best_segment = df_filtered.groupby('Segment')['Profit'].sum().idxmax() if 'Segment' in df.columns else "N/A"
-        yoy_growth = np.random.uniform(5, 15) # Simulated for demo if data insufficient
         
-        st.info(f"💡 **AI INSIGHT:** The **{best_segment}** segment is outperforming targets. Projected YoY Growth is trending at **+{yoy_growth:.1f}%**.")
+        k1, k2, k3, k4 = st.columns(4)
+        with k1: st.markdown(f"<div class='kpi-box'><div class='kpi-lbl'>REVENUE</div><div class='kpi-val'>${total_sales:,.0f}</div></div>", unsafe_allow_html=True)
+        with k2: st.markdown(f"<div class='kpi-box'><div class='kpi-lbl'>NET PROFIT</div><div class='kpi-val'>${total_profit:,.0f}</div></div>", unsafe_allow_html=True)
+        with k3: st.markdown(f"<div class='kpi-box'><div class='kpi-lbl'>MARGIN</div><div class='kpi-val'>{margin:.1f}%</div></div>", unsafe_allow_html=True)
+        with k4: st.markdown(f"<div class='kpi-box'><div class='kpi-lbl'>ORDERS</div><div class='kpi-val'>{total_orders:,}</div></div>", unsafe_allow_html=True)
 
-        # --- MAIN TABS ---
-        tab_overview, tab_cust, tab_prod, tab_ship = st.tabs(["📊 PERFORMANCE OVERVIEW", "👥 CUSTOMER DNA", "🛍️ PRODUCT STRATEGY", "🚚 LOGISTICS & RISK"])
+        st.write("") 
 
-        # TAB 1: OVERVIEW & FORECASTING
-        with tab_overview:
-            # KPIS
-            total_rev = df_filtered['Sales'].sum()
-            total_prof = df_filtered['Profit'].sum()
-            margin = (total_prof / total_rev) * 100 if total_rev > 0 else 0
+        # --- MAP & TABS LAYOUT ---
+        col_map_viz, col_charts = st.columns([1, 2])
+        
+        # --- LEFT: MAP ---
+        with col_map_viz:
+            st.markdown(f"<h5 style='color:{GOLD}; text-align:center;'>GEOGRAPHIC FOOTPRINT</h5>", unsafe_allow_html=True)
             
-            k1, k2, k3, k4 = st.columns(4)
-            k1.metric("Total Revenue", f"${total_rev:,.0f}", "+12.5%")
-            k2.metric("Net Profit", f"${total_prof:,.0f}", "+8.2%")
-            k3.metric("Profit Margin", f"{margin:.1f}%", "-1.2%")
-            k4.metric("Avg Order Value", f"${df_filtered['Sales'].mean():.0f}")
+            # Map Aggregation
+            state_sales = df.groupby('State')['Sales'].sum().reset_index()
+            
+            # Logic: Highlight selected states in GOLD
+            if sel_state:
+                state_sales['Color'] = state_sales['State'].apply(lambda x: 10 if x in sel_state else 1)
+                state_sales = state_sales.sort_values('Color', ascending=False)
+                color_col, color_scale = 'Color', [[0, '#1C2541'], [0.5, '#1C2541'], [1, GOLD]]
+            else:
+                color_col, color_scale = 'Sales', [[0, '#1C2541'], [1, GOLD]]
 
-            # FORECASTING CHART
-            st.markdown("### 📈 REVENUE FORECAST (NEXT 12 MONTHS)")
+            fig_map = px.scatter_geo(
+                state_sales, locations="State", locationmode="USA-states",
+                size="Sales", color=color_col,
+                color_continuous_scale=color_scale,
+                scope="usa", hover_name="State"
+            )
+            fig_map.update_traces(marker=dict(line=dict(width=1, color=GOLD)))
+            fig_map.update_layout(
+                paper_bgcolor=BG_COLOR,
+                geo=dict(bgcolor=BG_COLOR, lakecolor=BG_COLOR, landcolor='#151b2e', subunitcolor='#333'),
+                margin=dict(l=0, r=0, t=0, b=0), height=350, dragmode=False, showlegend=False, coloraxis_showscale=False
+            )
+            st.plotly_chart(fig_map, use_container_width=True)
             
-            # Aggregate Monthly Data
-            df_monthly = df_filtered.groupby(pd.Grouper(key=date_col, freq='M'))['Sales'].sum().reset_index()
-            
-            # Generate Synthetic Forecast (Linear Trend + Seasonality) for Portfolio Demo
-            last_date = df_monthly[date_col].max()
-            future_dates = [last_date + pd.DateOffset(months=x) for x in range(1, 13)]
-            avg_monthly = df_monthly['Sales'].mean()
-            trend = np.linspace(0, avg_monthly * 0.2, 12) # 20% growth trend
-            noise = np.random.normal(0, avg_monthly * 0.05, 12)
-            forecast_values = [avg_monthly + t + n for t, n in zip(trend, noise)]
-            
-            # Confidence Bands
-            upper_band = [v * 1.15 for v in forecast_values]
-            lower_band = [v * 0.85 for v in forecast_values]
-            
-            fig_cast = go.Figure()
-            # Historical
-            fig_cast.add_trace(go.Scatter(x=df_monthly[date_col], y=df_monthly['Sales'], name='Historical', line=dict(color='#0066ff', width=3)))
-            # Forecast
-            fig_cast.add_trace(go.Scatter(x=future_dates, y=forecast_values, name='Forecast', line=dict(color='#00ccff', dash='dash')))
-            # Confidence
-            fig_cast.add_trace(go.Scatter(x=future_dates+future_dates[::-1], y=upper_band+lower_band[::-1], 
-                                          fill='toself', fillcolor='rgba(0,204,255,0.2)', line=dict(color='rgba(255,255,255,0)'), name='Confidence Interval'))
-            
-            fig_cast.update_layout(height=350, margin=dict(l=0,r=0,t=0,b=0), legend=dict(orientation="h", y=1.1))
-            st.plotly_chart(fig_cast, use_container_width=True)
+            # Profit Trend (Small)
+            st.markdown(f"<h5 style='color:{GOLD}; text-align:center;'>PROFIT TREND</h5>", unsafe_allow_html=True)
+            trend = df_viz.groupby(pd.Grouper(key=date_col, freq='M'))['Profit'].sum().reset_index()
+            fig_trend = px.area(trend, x=date_col, y='Profit', line_shape='spline')
+            fig_trend.update_traces(line_color=GOLD, fillcolor='rgba(212, 175, 55, 0.1)')
+            fig_trend.update_layout(
+                template="plotly_dark", paper_bgcolor=BG_COLOR, plot_bgcolor=BG_COLOR, 
+                font_color=TEXT_COLOR, margin=dict(l=0,r=0,t=0,b=0), height=200, xaxis_title="", yaxis_title=""
+            )
+            st.plotly_chart(fig_trend, use_container_width=True)
 
-        # TAB 2: CUSTOMER DNA (PARETO & COHORTS)
-        with tab_cust:
-            c1, c2 = st.columns(2)
-            
-            with c1:
-                st.markdown("**💰 Customer Profitability Pareto**")
-                if 'Customer Name' in df_filtered.columns:
-                    cust_prof = df_filtered.groupby('Customer Name')['Profit'].sum().sort_values(ascending=False).reset_index()
-                    cust_prof['Cumulative %'] = 100 * (cust_prof['Profit'].cumsum() / cust_prof['Profit'].sum())
-                    
-                    # Highlight "Whales" vs "Loss Leaders"
-                    cust_prof['Type'] = np.where(cust_prof['Profit'] < 0, 'Unprofitable', 'Profitable')
-                    
-                    fig_pareto = px.bar(cust_prof.head(50), x='Customer Name', y='Profit', color='Type', 
-                                        color_discrete_map={'Profitable': '#00ccff', 'Unprofitable': '#ff2a2a'})
-                    fig_pareto.update_layout(showlegend=True, xaxis={'visible': False})
-                    st.plotly_chart(fig_pareto, use_container_width=True)
-                    st.caption("Top 50 Customers: Red bars indicate negative profit impact.")
-            
-            with c2:
-                st.markdown("**📅 Cohort Retention Heatmap**")
-                # Simulated Heatmap for Portfolio Visual
-                cohort_data = np.random.rand(12, 12)
-                x_axis = [f"M+{i}" for i in range(12)]
-                y_axis = [f"2023-{i:02d}" for i in range(1, 13)]
+        # --- RIGHT: DYNAMIC CHARTS ---
+        with col_charts:
+            # Dynamic Header
+            if sel_state:
+                st.markdown(f"<h5 style='color:{GOLD}'>TOP CITIES IN SELECTION</h5>", unsafe_allow_html=True)
+                city_perf = df_viz.groupby('City')[['Sales', 'Profit']].sum().sort_values('Sales', ascending=False).head(10).reset_index()
                 
-                fig_heat = px.imshow(cohort_data, labels=dict(x="Months After Acquisition", y="Cohort Month", color="Retention"),
-                                     x=x_axis, y=y_axis, color_continuous_scale='Blues')
-                st.plotly_chart(fig_heat, use_container_width=True)
+                fig_city = make_subplots(specs=[[{"secondary_y": True}]])
+                fig_city.add_trace(go.Bar(x=city_perf['City'], y=city_perf['Sales'], name='Sales', marker_color=GOLD), secondary_y=False)
+                fig_city.add_trace(go.Scatter(x=city_perf['City'], y=city_perf['Profit'], name='Profit', line=dict(color=CREAM, width=2)), secondary_y=True)
+                
+                fig_city.update_layout(template="plotly_dark", paper_bgcolor=BG_COLOR, plot_bgcolor=BG_COLOR, height=350, margin=dict(t=10, b=0, l=0, r=0), showlegend=False)
+                st.plotly_chart(fig_city, use_container_width=True)
+            else:
+                st.markdown(f"<h5 style='color:{GOLD}'>CATEGORY PERFORMANCE</h5>", unsafe_allow_html=True)
+                cat_perf = df_viz.groupby('Category')[['Sales', 'Profit']].sum().reset_index()
+                
+                fig_cat = go.Figure()
+                fig_cat.add_trace(go.Bar(x=cat_perf['Category'], y=cat_perf['Sales'], name='Sales', marker_color=GOLD))
+                fig_cat.add_trace(go.Bar(x=cat_perf['Category'], y=cat_perf['Profit'], name='Profit', marker_color=CREAM))
+                fig_cat.update_layout(template="plotly_dark", paper_bgcolor=BG_COLOR, plot_bgcolor=BG_COLOR, height=350, barmode='group', margin=dict(t=10))
+                st.plotly_chart(fig_cat, use_container_width=True)
 
-        # TAB 3: PRODUCT STRATEGY
-        with tab_prod:
-            p1, p2 = st.columns([1, 2])
+            # --- DEEP DIVE TABS (RESTORED ALL 4) ---
+            st.write("")
+            tab1, tab2, tab3, tab4 = st.tabs(["📊 FORECASTING", "👥 CUSTOMER DNA", "🛍️ PRODUCT", "🚚 LOGISTICS"])
             
-            with p1:
+            with tab1:
+                st.markdown("**Profit Forecast (Next 12 Months)**")
+                if len(trend) > 5:
+                    last_date = trend[date_col].max()
+                    future_dates = [last_date + pd.DateOffset(months=x) for x in range(1, 13)]
+                    avg_prof = trend['Profit'].mean()
+                    scale_val = abs(avg_prof * 0.2) if avg_prof != 0 else 100
+                    forecast = [avg_prof * (1 + i*0.02) + np.random.normal(0, scale_val) for i in range(12)]
+                    
+                    fig_cast = go.Figure()
+                    fig_cast.add_trace(go.Scatter(x=trend[date_col], y=trend['Profit'], name='History', line=dict(color=CREAM)))
+                    fig_cast.add_trace(go.Scatter(x=future_dates, y=forecast, name='Forecast', line=dict(color=GOLD, dash='dash')))
+                    fig_cast.update_layout(template="plotly_dark", paper_bgcolor=BG_COLOR, plot_bgcolor=BG_COLOR, height=300, margin=dict(t=10,l=0,r=0,b=0))
+                    st.plotly_chart(fig_cast, use_container_width=True)
+                else:
+                    st.info("Insufficient data history.")
+
+            with tab2:
+                c1, c2 = st.columns(2)
+                with c1:
+                    st.markdown("**Profitability Pareto**")
+                    cust_prof = df_viz.groupby('Customer Name')['Profit'].sum().sort_values(ascending=False).head(15).reset_index()
+                    cust_prof['Color'] = np.where(cust_prof['Profit']<0, '#FF4B4B', GOLD)
+                    fig_par = px.bar(cust_prof, x='Customer Name', y='Profit', color='Color', color_discrete_map="identity")
+                    fig_par.update_layout(template="plotly_dark", paper_bgcolor=BG_COLOR, plot_bgcolor=BG_COLOR, showlegend=False, height=250, xaxis={'visible':False})
+                    st.plotly_chart(fig_par, use_container_width=True)
+                with c2:
+                    st.markdown("**Segment Share**")
+                    seg = df_viz.groupby('Segment')['Sales'].sum().reset_index()
+                    fig_pie = px.pie(seg, values='Sales', names='Segment', hole=0.5, color_discrete_sequence=[GOLD, CREAM, '#8d99ae'])
+                    fig_pie.update_layout(template="plotly_dark", paper_bgcolor=BG_COLOR, plot_bgcolor=BG_COLOR, height=250, margin=dict(t=0,b=0,l=0,r=0))
+                    st.plotly_chart(fig_pie, use_container_width=True)
+
+            with tab3:
                 st.markdown("**Top Sub-Categories**")
-                if 'Sub-Category' in df_filtered.columns:
-                    sub_cat = df_filtered.groupby('Sub-Category')['Sales'].sum().nlargest(8)
-                    fig_sub = px.bar(x=sub_cat.values, y=sub_cat.index, orientation='h', color=sub_cat.values, color_continuous_scale='Teal')
-                    fig_sub.update_layout(showlegend=False)
-                    st.plotly_chart(fig_sub, use_container_width=True)
-            
-            with p2:
-                st.markdown("**🔄 Cross-Sell Matrix (Basket Analysis)**")
-                # Simulated Correlation Matrix for Sub-Categories
-                if 'Sub-Category' in df_filtered.columns:
-                    cats = df_filtered['Sub-Category'].unique()[:8] # Top 8 for clean visual
-                    matrix_size = len(cats)
-                    # Create symmetric matrix with 1s on diagonal
-                    corr = np.random.uniform(0.1, 0.8, (matrix_size, matrix_size))
-                    np.fill_diagonal(corr, 1)
-                    
-                    fig_matrix = px.imshow(corr, x=cats, y=cats, color_continuous_scale='Viridis', zmin=0, zmax=1)
-                    st.plotly_chart(fig_matrix, use_container_width=True)
-                    st.caption("Likelihood of products being purchased together.")
+                sub = df_viz.groupby('Sub-Category')['Sales'].sum().nlargest(8).sort_values(ascending=True)
+                fig_sub = px.bar(x=sub.values, y=sub.index, orientation='h')
+                fig_sub.update_traces(marker_color=GOLD)
+                fig_sub.update_layout(template="plotly_dark", paper_bgcolor=BG_COLOR, plot_bgcolor=BG_COLOR, height=250, margin=dict(t=0,b=0,l=0,r=0))
+                st.plotly_chart(fig_sub, use_container_width=True)
 
-        # TAB 4: LOGISTICS & ANOMALIES
-        with tab_ship:
-            l1, l2 = st.columns(2)
-            
-            with l1:
-                st.markdown("**🚚 Shipping Efficiency**")
-                ship_perf = df_filtered.groupby('Ship Mode').agg({'Profit': 'mean', 'Sales': 'count'}).reset_index()
-                fig_ship = px.scatter(ship_perf, x='Sales', y='Profit', size='Sales', color='Ship Mode', text='Ship Mode')
-                st.plotly_chart(fig_ship, use_container_width=True)
-                
-            with l2:
-                st.markdown("**🚨 Anomaly Detection (High Discount / Low Margin)**")
-                if 'Discount' in df_filtered.columns:
-                    df_filtered['Margin'] = df_filtered['Profit'] / df_filtered['Sales']
-                    anomalies = df_filtered[df_filtered['Margin'] < -0.5] # Flag orders with <-50% margin
-                    
-                    fig_anom = px.scatter(df_filtered, x='Discount', y='Margin', color='Region', 
-                                          title="Discount Impact on Margin")
-                    # Add rectangle highlighting the danger zone
-                    fig_anom.add_hrect(y0=-10, y1=-0.5, line_width=0, fillcolor="red", opacity=0.1)
+            # TAB 4: LOGISTICS (RESTORED)
+            with tab4:
+                l1, l2 = st.columns(2)
+                with l1:
+                    st.markdown("**Shipping Efficiency**")
+                    ship = df_viz.groupby('Ship Mode').agg({'Profit':'mean', 'Sales':'sum'}).reset_index()
+                    fig_ship = px.scatter(ship, x='Sales', y='Profit', size='Sales', color='Ship Mode')
+                    fig_ship.update_layout(template="plotly_dark", paper_bgcolor=BG_COLOR, plot_bgcolor=BG_COLOR, height=250)
+                    st.plotly_chart(fig_ship, use_container_width=True)
+                with l2:
+                    st.markdown("**Margin Anomalies**")
+                    df_viz['Margin'] = df_viz['Profit'] / df_viz['Sales']
+                    fig_anom = px.scatter(df_viz, x='Discount', y='Margin', color='Profit', color_continuous_scale='RdYlGn')
+                    fig_anom.add_hrect(y0=-5, y1=-0.1, fillcolor="red", opacity=0.1, line_width=0)
+                    fig_anom.update_layout(template="plotly_dark", paper_bgcolor=BG_COLOR, plot_bgcolor=BG_COLOR, height=250)
                     st.plotly_chart(fig_anom, use_container_width=True)
-                    st.caption(f"Flagged {len(anomalies)} orders with critical negative margins (Red Zone).")
-
     # ------------------------------------------------------------------
     # PROJECT 2: HEART DISEASE
     # ------------------------------------------------------------------
