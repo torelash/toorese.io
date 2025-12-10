@@ -43,19 +43,10 @@ def navigate_to(page_name):
 
 
 # --- 3. GLOBAL STYLING & FONTS ---
-st.markdown("""
-<style>
-    /* IMPORT FONTS */
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@300;400;700&display=swap');
+# --- 3. DYNAMIC STYLING (Dark Home, Light Content) ---
 
-    /* APPLY FONTS GLOBALLY */
-    html, body, [class*="css"] {
-        font-family: 'Lato', sans-serif;
-    }
-    h1, h2, h3, .name-title, .nav-header {
-        font-family: 'Playfair Display', serif;
-    }
-
+# A. DEFINE THE CSS FOR EACH THEME
+dark_home_css = """
     /* DARK THEME BACKGROUND */
     .stApp {
         background-color: #0f1219;
@@ -64,12 +55,13 @@ st.markdown("""
         background-size: cover;
     }
     
-    /* HIDE DEFAULT ELEMENTS */
-    [data-testid="stSidebar"] { display: none; }
-    header { visibility: hidden; }
-    .block-container { padding-top: 2rem; max-width: 1100px; }
-
-    /* NAVIGATION BUTTON STYLES */
+    /* LIGHT TEXT FOR DARK BACKGROUND */
+    h1, h2, h3, h4, h5, p, div, span, label {
+        color: #e2e8f0;
+    }
+    .stMarkdown, .stText { color: #cbd5e1; }
+    
+    /* PREMIUM BUTTONS (Gold/Glass) */
     div.stButton > button {
         width: 100%;
         background-color: rgba(255, 255, 255, 0.05);
@@ -87,65 +79,96 @@ st.markdown("""
         color: #fff;
         transform: translateY(-3px);
     }
+"""
+
+light_content_css = """
+    /* LIGHT THEME BACKGROUND */
+    .stApp {
+        background-color: #ffffff;
+        background-image: none;
+    }
     
-    /* TEXT UTILITIES */
-    .bio-text { font-size: 1.1rem; line-height: 1.6; color: #cbd5e1; font-weight: 300; }
-    .link-pill { 
+    /* RESET TEXT COLORS */
+    h1, h2, h3, .name-title {
+        color: #1a1a1a;
+    }
+    
+    /* SIMPLE 'BACK' BUTTON STYLING */
+    div.stButton > button {
+        background-color: #f0f2f6;
+        color: #31333f;
+        border: 1px solid #dce0e6;
+        border-radius: 8px;
+        padding: 5px 15px;
+        font-weight: 600;
+    }
+    div.stButton > button:hover {
+        border-color: #0066ff;
+        color: #0066ff;
+    }
+
+    /* --- RESTORE UNIVERSAL METRIC CARDS (THICKER VERSION) --- */
+    div[data-testid="stMetric"] {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        /* UPDATED PADDING: 25px top/bottom makes it look thicker */
+        padding: 25px 15px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08); /* Slightly stronger shadow for depth */
+        text-align: center;
+        width: 100%;
+    }
+    
+    /* Force center alignment */
+    div[data-testid="stMetric"] > div {
+        width: 100%;
+        margin: 0 auto;
+        justify-content: center;
+    }
+"""
+
+# B. SELECT CSS BASED ON PAGE
+if st.session_state.page == "Home":
+    active_css = dark_home_css
+else:
+    active_css = light_content_css
+
+# C. RENDER CSS
+st.markdown(f"""
+<style>
+    /* 1. GLOBAL FONTS (Always Apply) */
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@300;400;700&display=swap');
+    
+    html, body, [class*="css"] {{
+        font-family: 'Lato', sans-serif;
+    }}
+    h1, h2, h3, .name-title, .nav-header {{
+        font-family: 'Playfair Display', serif;
+    }}
+    
+    /* 2. HIDE SIDEBAR (Always) */
+    [data-testid="stSidebar"] {{ display: none; }}
+    header {{ visibility: hidden; }}
+    .block-container {{ padding-top: 2rem; max-width: 1100px; }}
+
+    /* 3. HOME PAGE SPECIFIC CLASSES (Profile, Pills, Bio) */
+    .profile-img {{ 
+        width: 160px; height: 160px; border-radius: 50%; object-fit: cover; 
+        border: 3px solid rgba(212, 175, 55, 0.6); box-shadow: 0 0 25px rgba(212, 175, 55, 0.2); 
+    }}
+    .name-title {{ font-size: 3.5rem; font-weight: 700; color: #f1e5ac; margin-bottom: 10px; line-height: 1.1; }}
+    .bio-text {{ font-size: 1.1rem; line-height: 1.6; color: #cbd5e1; font-weight: 300; }}
+    
+    .link-pill {{ 
         text-decoration: none; background: rgba(255,255,255,0.08); 
         color: #cbd5e1 !important; padding: 6px 16px; border-radius: 20px; 
         font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.1); 
         margin-right: 10px; transition: all 0.3s ease; display: inline-block; margin-top: 5px;
-    }
-    .link-pill:hover { border-color: #f1e5ac; color: #f1e5ac !important; }
-    .profile-img { 
-        width: 160px; height: 160px; border-radius: 50%; object-fit: cover; 
-        border: 3px solid rgba(212, 175, 55, 0.6); box-shadow: 0 0 25px rgba(212, 175, 55, 0.2); 
-    }
-    .name-title { font-size: 3.5rem; font-weight: 700; color: #f1e5ac; margin-bottom: 10px; line-height: 1.1; }
+    }}
+    .link-pill:hover {{ border-color: #f1e5ac; color: #f1e5ac !important; }}
 
-    /* --- PROJECT UTILITY CLASSES (Dark Mode Versions) --- */
-    .api-badge {
-        background-color: rgba(0, 102, 255, 0.2);
-        color: #66b3ff;
-        border: 1px solid #0066ff;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: bold;
-        margin-left: 10px;
-    }
-    
-    .alert-box {
-        background-color: rgba(255, 80, 80, 0.15);
-        border: 1px solid rgba(255, 80, 80, 0.5);
-        color: #ff9999;
-        padding: 12px;
-        border-radius: 6px;
-        font-weight: 600;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    /* CUSTOM METRIC CARDS (For Projects) */
-    div[data-testid="stMetric"] {
-        background-color: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-left: 4px solid #f1e5ac; /* Gold Accent */
-        padding: 15px;
-        border-radius: 8px;
-    }
-    label[data-testid="stMetricLabel"] { color: #cbd5e1 !important; }
-    div[data-testid="stMetricValue"] { color: #fff !important; }
-    
-    /* PLOTLY CHART CONTAINERS */
-    .stPlotlyChart {
-        background-color: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-        padding: 10px;
-    }
+    /* 4. ACTIVE THEME (Injected) */
+    {active_css}
 
 </style>
 """, unsafe_allow_html=True)
