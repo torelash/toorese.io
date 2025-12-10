@@ -241,23 +241,41 @@ if st.session_state.page == "Home":
 
 # --- SMART DATA LOADER (COMBINED FIX) ---
 @st.cache_data
-def load_data(filename):
+def load_data(filename, limit=None, sample_rate=None):
     """
-    1. Tries to load from absolute path (os.path.dirname).
-    2. If missing/fails, falls back to generator_func.
+    1. limit: Load only the top N rows (Good for simple testing).
+    2. sample_rate: Load a random % of rows (Good for seeing ALL years without crashing).
+       Example: sample_rate=0.1 loads 10% of the data.
     """
     try:
         # Get directory of this script
         current_dir = os.path.dirname(os.path.abspath(__file__))
         path = os.path.join(current_dir, "data", filename)
         
-        # Try loading
+        # LOGIC: Define which rows to skip if sampling is on
+        skip_logic = None
+        if sample_rate is not None:
+            # lambda x: Keep header (x==0) or keep row if random number < sample_rate
+            import random
+            skip_logic = lambda x: x > 0 and random.random() > sample_rate
+
         try:
-            return pd.read_csv(path, encoding='utf-8', on_bad_lines='skip')
+            return pd.read_csv(
+                path, 
+                encoding='utf-8', 
+                on_bad_lines='skip', 
+                nrows=limit, 
+                skiprows=skip_logic
+            )
         except UnicodeDecodeError:
-            return pd.read_csv(path, encoding='windows-1252', on_bad_lines='skip')
+            return pd.read_csv(
+                path, 
+                encoding='windows-1252', 
+                on_bad_lines='skip', 
+                nrows=limit,
+                skiprows=skip_logic
+            )
     except:
-        # Fallback to synthetic data
         return None
 
 # --- NYC DATA LOADING ---
@@ -1123,7 +1141,7 @@ elif st.session_state.page == "Projects":
         """, unsafe_allow_html=True)
 
         # --- 2. LOAD & PREP DATA ---
-        df = load_data("ufo.csv")
+        df = load_data("ufo.csv", sample_rate=0.20)
         
         # Data Cleaning
         df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
