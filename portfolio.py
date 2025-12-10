@@ -14,13 +14,17 @@ from datetime import datetime, timedelta
 from nba import render_nba
 from wnba import render_wnba
 
-# --- PAGE CONFIGURATION ---
+# --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="Toorese | Portfolio",
     page_icon="⚡",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
+
+# --- 2. SESSION STATE NAVIGATION LOGIC ---
+if 'page' not in st.session_state:
+    st.session_state.page = "Home"
 
 # --- SESSION STATE INITIALIZATION ---
 if 'show_toast' not in st.session_state:
@@ -31,211 +35,185 @@ if 'toast_message' not in st.session_state:
 if "active_hobby" not in st.session_state:
     st.session_state.active_hobby = None
 
-# --- SIDEBAR & ANIMATION STYLING ---
+def navigate_to(page_name):
+    st.session_state.page = page_name
+    st.rerun()
+
+
+
+
+# --- 3. GLOBAL STYLING & FONTS ---
 st.markdown("""
 <style>
-    /* VARIABLES */
-    :root {
-        --primary: #0066ff;
-        --sidebar-bg: #f8f9fa;
-        --sidebar-text: #31333F;
-        --sidebar-hover: rgba(0, 0, 0, 0.05);
+    /* IMPORT FONTS */
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@300;400;700&display=swap');
+
+    /* APPLY FONTS GLOBALLY */
+    html, body, [class*="css"] {
+        font-family: 'Lato', sans-serif;
+    }
+    h1, h2, h3, .name-title, .nav-header {
+        font-family: 'Playfair Display', serif;
     }
 
-    /* SIDEBAR BACKGROUND */
-    [data-testid="stSidebar"] {
-        background-color: var(--sidebar-bg);
-        border-right: 1px solid #e0e0e0;
+    /* DARK THEME BACKGROUND */
+    .stApp {
+        background-color: #0f1219;
+        background-image: radial-gradient(circle at 50% 0%, #2d3748 0%, #0f1219 70%);
+        background-attachment: fixed;
+        background-size: cover;
     }
     
-    /* NAVIGATOR TITLE */
-    .nav-title {
-        font-family: 'Segoe UI', sans-serif;
-        font-size: 0.85rem;
-        font-weight: 700;
-        letter-spacing: 1.5px;
-        color: #888;
-        text-transform: uppercase;
-        margin-bottom: 20px;
-        padding-left: 5px;
-    }
+    /* HIDE DEFAULT ELEMENTS */
+    [data-testid="stSidebar"] { display: none; }
+    header { visibility: hidden; }
+    .block-container { padding-top: 2rem; max-width: 1100px; }
 
-    /* CUSTOM RADIO BUTTONS (Main Nav) */
-    .stRadio > div { gap: 12px; }
-    .stRadio label {
-        font-size: 1rem !important;
-        padding: 8px 12px !important;
-        border-radius: 6px;
-        transition: all 0.2s ease;
-        color: var(--sidebar-text) !important;
-        cursor: pointer;
-    }
-    .stRadio label:hover {
-        background-color: var(--sidebar-hover);
-        color: #000 !important;
-        transform: translateX(4px);
-    }
-    /* Highlight Active Item */
-    div[role="radiogroup"] > label[data-baseweb="radio"] > div:first-child {
-        background-color: #0066ff !important;
-        border-color: #0066ff !important;
-    }
-
-    /* SUB-MENU (HOBBIES) STYLING */
-    button[kind="secondary"] {
-        border: none !important;
-        background: transparent !important;
-        color: #555 !important;
-        font-size: 0.9rem !important;
-        text-align: left !important;
-        width: 100% !important;
-        padding-left: 30px !important;
-        transition: color 0.3s, background 0.3s !important;
-    }
-    button[kind="secondary"]:hover {
-        color: #0066ff !important;
-        background: var(--sidebar-hover) !important;
-        font-weight: 600;
-    }
-    
-    /* Chevron & Expander Headers */
-    [data-testid="stSidebar"] .streamlit-expanderHeader {
-        color: var(--sidebar-text);
-        font-weight: 600;
-        background-color: transparent;
-    }
-    [data-testid="stSidebar"] .streamlit-expanderHeader:hover {
-        color: #0066ff;
-    }
-
-    /* --- "COMING SOON" ANIMATION --- */
-    @keyframes slidePulse {
-        0% { transform: translate(-50%, -50%) translateX(100vw); opacity: 0; }
-        10% { transform: translate(-50%, -50%) translateX(0); opacity: 1; }
-        20% { transform: translate(-50%, -50%) scale(1.05); }
-        30% { transform: translate(-50%, -50%) scale(1); }
-        40% { transform: translate(-50%, -50%) scale(1.05); }
-        50% { transform: translate(-50%, -50%) scale(1); }
-        80% { opacity: 1; }
-        100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); visibility: hidden;}
-    }
-    
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-
-    .coming-soon-card {
-        position: fixed;
-        top: 50%;
-        left: 58%;
-        transform: translate(-50%, -50%);
-        background: rgba(255, 255, 255, 0.95); /* Light card */
-        border: 1px solid #e0e0e0;
-        border-left: 5px solid #0066ff;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-        padding: 40px 80px;
+    /* NAVIGATION BUTTON STYLES */
+    div.stButton > button {
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.05);
+        color: #f1e5ac;
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
-        z-index: 999999;
-        text-align: center;
-        animation: slidePulse 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        backdrop-filter: blur(5px);
-    }
-    
-    .pulse-icon {
-        font-size: 3.5rem;
-        margin-bottom: 15px;
-        display: inline-block;
-        animation: spin 3s linear infinite;
-    }
-    
-    .coming-text {
-        font-family: 'Segoe UI', sans-serif;
-        font-weight: 800;
+        height: 100px;
+        font-family: 'Playfair Display', serif;
         font-size: 1.5rem;
-        color: #333;
-        text-transform: uppercase;
-        letter-spacing: 2px;
+        transition: all 0.3s ease;
     }
-</style>
-""", unsafe_allow_html=True)
-
-# --- GLOBAL STYLING ---
-st.markdown("""
-<style>
-    :root {
-        --primary: #0066ff;
-        --secondary: #00f3ff;
-        --bg-card: #ffffff;
-        --text: #1a1a1a;
-        --border: #e0e0e0;
+    div.stButton > button:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: #f1e5ac;
+        color: #fff;
+        transform: translateY(-3px);
     }
-    .stApp { background-color: #f8f9fa; color: var(--text); }
-    .block-container { padding-top: 2rem; padding-bottom: 5rem; }
     
-    div[data-testid="stMetric"] {
-        background-color: var(--bg-card);
-        border: 1px solid var(--border);
-        border-left: 5px solid var(--primary);
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    /* TEXT UTILITIES */
+    .bio-text { font-size: 1.1rem; line-height: 1.6; color: #cbd5e1; font-weight: 300; }
+    .link-pill { 
+        text-decoration: none; background: rgba(255,255,255,0.08); 
+        color: #cbd5e1 !important; padding: 6px 16px; border-radius: 20px; 
+        font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.1); 
+        margin-right: 10px; transition: all 0.3s ease; display: inline-block; margin-top: 5px;
     }
-    label[data-testid="stMetricLabel"] {
-        color: #666 !important;
-        font-size: 0.85rem !important;
-        font-weight: 600;
+    .link-pill:hover { border-color: #f1e5ac; color: #f1e5ac !important; }
+    .profile-img { 
+        width: 160px; height: 160px; border-radius: 50%; object-fit: cover; 
+        border: 3px solid rgba(212, 175, 55, 0.6); box-shadow: 0 0 25px rgba(212, 175, 55, 0.2); 
     }
-    div[data-testid="stMetricValue"] {
-        color: #111 !important;
-        font-size: 1.6rem !important;
-        font-weight: 700;
-    }
-    .hero-title {
-        font-family: 'Segoe UI', sans-serif;
-        font-weight: 800;
-        font-size: 2.2rem;
-        color: #111;
-        letter-spacing: -1px;
-        margin-bottom: 5px;
-    }
-    .hero-subtitle {
-        font-size: 1rem;
-        color: #666;
-        margin-bottom: 20px;
-    }
+    .name-title { font-size: 3.5rem; font-weight: 700; color: #f1e5ac; margin-bottom: 10px; line-height: 1.1; }
+
+    /* --- PROJECT UTILITY CLASSES (Dark Mode Versions) --- */
     .api-badge {
-        background-color: #e6f0ff;
-        color: #0066ff;
-        padding: 5px 12px;
-        border-radius: 15px;
+        background-color: rgba(0, 102, 255, 0.2);
+        color: #66b3ff;
+        border: 1px solid #0066ff;
+        padding: 4px 10px;
+        border-radius: 12px;
         font-size: 0.75rem;
         font-weight: bold;
-        border: 1px solid #0066ff;
-        vertical-align: middle;
         margin-left: 10px;
     }
+    
     .alert-box {
-        background-color: #fff5f5;
-        border: 1px solid #ffcccc;
-        color: #d60000;
+        background-color: rgba(255, 80, 80, 0.15);
+        border: 1px solid rgba(255, 80, 80, 0.5);
+        color: #ff9999;
         padding: 12px;
         border-radius: 6px;
         font-weight: 600;
-        font-size: 0.9rem;
+        margin-bottom: 10px;
         display: flex;
         align-items: center;
         gap: 10px;
-        margin-bottom: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
+
+    /* CUSTOM METRIC CARDS (For Projects) */
+    div[data-testid="stMetric"] {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-left: 4px solid #f1e5ac; /* Gold Accent */
+        padding: 15px;
+        border-radius: 8px;
+    }
+    label[data-testid="stMetricLabel"] { color: #cbd5e1 !important; }
+    div[data-testid="stMetricValue"] { color: #fff !important; }
+    
+    /* PLOTLY CHART CONTAINERS */
     .stPlotlyChart {
-        background-color: #ffffff;
-        border: 1px solid var(--border);
+        background-color: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 8px;
         padding: 10px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
-    .sparkline-box { margin-top: -15px; margin-bottom: 15px; opacity: 0.8; }
+
 </style>
 """, unsafe_allow_html=True)
+
+
+# ==========================================
+# MASTER ROUTING LOGIC
+# ==========================================
+
+# --- 1. HOME PAGE LOGIC ---
+if st.session_state.page == "Home":
+    
+    # --- HEADER SECTION (Using standard Streamlit columns for layout) ---
+    c1, c2 = st.columns([1, 2.5])
+    
+    with c1:
+        # Profile Image
+        st.markdown('<img class="profile-img" src="https://placehold.co/400x400/1a1f2c/f1e5ac?text=TL">', unsafe_allow_html=True)
+        
+    with c2:
+        # Name & Title
+        st.markdown('<div class="name-title">Toorese Lasebikan</div>', unsafe_allow_html=True)
+        
+        # Pill Links
+        st.markdown("""
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                <a href="mailto:toorese@gmail.com" class="link-pill">✉️ toorese@gmail.com</a>
+                <a href="https://github.com/torelash" target="_blank" class="link-pill">🐙 GitHub</a>
+                <a href="https://linkedin.com/in/toorese-l" target="_blank" class="link-pill">🔗 LinkedIn</a>
+            </div>
+        """, unsafe_allow_html=True)
+
+    # --- BIO SECTION ---
+    st.write("") # Spacer
+    st.markdown("""
+    <div style="font-size: 1.1rem; line-height: 1.6; color: #cbd5e1; margin-top: 20px; max-width: 900px;">
+        Hi! I am Toorese. I am a data scientist who currently work in analytics at Amazon Business building metrics and machine learning programs that
+        support millions of customers and improve decisions at scale. I earned my masters in Data Analytics and Policy from Carnegie Mellon University
+        and my bachelors in Economics. I am especially interested in algorithmic fairness and how AI shapes outcomes in real systems. Outside of work,
+        I love basketball and I enjoy building creative tech projects that explore how data meets everyday life.
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.write("---") # Divider line
+
+    # --- NAVIGATION SECTION ---
+    st.markdown("<h3 style='color:#f1e5ac; margin-bottom: 20px;'>Explore Portfolio</h3>", unsafe_allow_html=True)
+    
+    # Row 1: Main Nav
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("📂 PROJECTS\n\nCurated tools & models"):
+            navigate_to("Projects")
+    with col2:
+        if st.button("🧠 SKILLS\n\nTech stack & expertise"):
+            navigate_to("Skills")
+    with col3:
+        if st.button("💬 CONTACT\n\nLet's connect"):
+            navigate_to("Contact")
+
+    # Row 2: Hobbies
+    # Hobbies Grid
+    st.markdown("<h3 style='color:#f1e5ac; margin-top: 30px; font-size: 1.2rem;'>Analytics Hobbies</h3>", unsafe_allow_html=True)
+    h1, h2 = st.columns(2)
+    with h1:
+        if st.button("🏀 NBA ANALYTICS"): navigate_to("NBA")
+    with h2:
+        if st.button("⛹️‍♀️ WNBA ANALYTICS"): navigate_to("WNBA")
 
 
 # --- SMART DATA LOADER (COMBINED FIX) ---
@@ -310,75 +288,11 @@ def load_live_data():
     return df
 
 
-# --- SIDEBAR NAVIGATION ---
-with st.sidebar:
-    st.markdown("<div class='nav-title'>NAVIGATOR</div>", unsafe_allow_html=True)
-    
-    # 1. Main Navigation
-    # Using format_func to add icons cleanly
-    page_selection = st.radio(
-        "Main Navigation", 
-        ["Home", "Projects", "Skills", "Contact"], 
-        label_visibility="collapsed",
-        format_func=lambda x: {
-            "Home": "🏠  Home", 
-            "Projects": "📋  Projects", 
-            "Skills": "📊  Skills", 
-            "Contact": "✉️  Contact"
-        }[x]
-    )
-    
-    st.write("") # Spacer
-    
-    # 2. Hobbies Expandable Section
-    with st.expander("🏀  Hobbies"):
-        st.markdown("<div style='margin-bottom:10px; color:#8b949e; font-size:0.8rem; font-weight:600; padding-left:10px;'>BASKETBALL STATISTICS</div>", unsafe_allow_html=True)
-        
-        # Micro-interaction Triggers + Routing Logic
-        if st.button("🏀  NBA Analysis"):
-            st.session_state.show_toast = True
-            st.session_state.toast_message = "NBA ANALYTICS"
-            st.session_state.active_hobby = "NBA"
-            
-        if st.button("⛹️‍♀️  WNBA Analysis"):
-            st.session_state.show_toast = True
-            st.session_state.toast_message = "WNBA ANALYTICS"
-            st.session_state.active_hobby = "WNBA"
-            
-# --- RENDER TOAST ANIMATION ---
-# --- RENDER TOAST ANIMATION ---
-if st.session_state.show_toast:
-    st.markdown(f"""
-        <div class="coming-soon-card">
-            <div class="pulse-icon">🏀</div>
-            <div class="coming-text">{st.session_state.toast_message}</div>
-            <div style="margin-top:5px; color:#8b949e; font-size:0.8rem; letter-spacing:1px;">MODULE LOADING...</div>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # Auto-dismiss logic
-    time.sleep(2.2) 
-    st.session_state.show_toast = False
-    st.rerun()
-
-# --- HOBBY ROUTER (NEW) ---
-active_hobby = st.session_state.get("active_hobby")
-
-if active_hobby == "NBA":
-    render_nba()
-    st.stop()
-elif active_hobby == "WNBA":
-    render_wnba()
-    st.stop()
-
-# --- MAIN CONTENT ROUTING ---
-page = page_selection
-
 
 # ==========================================
 # 1. HOME
 # ==========================================
-if page == "Home":
+if st.session_state.page == "Home":
     # --- PAGE-SPECIFIC STYLING ---
     st.markdown("""
     <style>
@@ -479,55 +393,15 @@ if page == "Home":
     </style>
     """, unsafe_allow_html=True)
 
-    # --- MAIN CONTENT WRAPPER ---
-    st.markdown('<div class="home-bg">', unsafe_allow_html=True)
-
-    # 1. IDENTITY HEADER
-    #st.image("https://placehold.co/400x400/png?text=TL", width=180) # Replace with your real photo URL
-    # Note: Streamlit centers images by default in columns, or use CSS to center specific classes if needed. 
-    # To force exact CSS centering for the image above, we rely on the parent div, 
-    # but Streamlit's st.image is strict. For a pure HTML feel:
-    
-    st.markdown(f"""
-        <h1 class='home-title'>Toorese Lasebikan | Data Scientist</h1>
-        <div class='home-subtitle'>Full Stack Data Scientist and Builder of Insightful Interfaces</div>
-        
-        <div class='brand-statement'>
-            "Telling stories with data. Solving real problems with clarity and logic."
-        </div>
-        
-        <div class='about-text'>
-            I am Toorese, a data scientist who enjoys discovering structure in messy information. 
-            I have worked across business intelligence, pricing optimization, and civic data projects 
-            where I build full pipeline solutions from raw data to clear decisions. I care about 
-            people who are affected by systems and I believe that responsible analytics can create 
-            more fairness and more trust. I enjoy storytelling with data and designing tools that 
-            make complexity feel simple and insightful.
-        </div>
-    """, unsafe_allow_html=True)
-
-    # 2. FEATURED PROJECT HIGHLIGHT
-    st.markdown("""
-        <div class='project-card'>
-            <div class='card-label'>FEATURED PROJECT</div>
-            <div class='card-title'>Live NYC Operations Center Dashboard</div>
-            <p>Real-time mobility tracking with 3D geospatial visualization.</p>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # 3. INTERACTIVE BUTTON (Outside HTML to use Streamlit logic)
-    st.write("")
-    c1, c2, c3 = st.columns([1, 1, 1])
-    with c2:
-        if st.button("🚀  Explore the Command Center", use_container_width=True):
-            st.info("Navigate to the **Projects** tab and select **Project 6** to launch.")
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
 # ==========================================
 # 2. PROJECTS
 # ==========================================
-elif page == "Projects":
+elif st.session_state.page == "Projects":
+    # The "Back" button to return to the dashboard
+    if st.button("← Back to Home", key="back_projects"): 
+        navigate_to("Home")
+    
+    st.write("") # Spacer
     
     project = st.selectbox("Select Active Module:", 
         ["1. Superstore Sales", "2. Heart Disease AI", "3. Movie Trends", "4. Meteorite Tracker", "5. UFO Sightings", "6. NYC OPERATIONS CENTER"],
@@ -1544,13 +1418,12 @@ elif page == "Projects":
         else:
             st.error("System Offline. Unable to connect to data feed.")
 
-# ==========================================
-# 3. SKILLS & CONTACT
-# ==========================================
+
 # ==========================================
 # 3. SKILLS PAGE
 # ==========================================
-elif page == "Skills":
+elif st.session_state.page == "Skills":
+    if st.button("← Back Home", key="back_skills"): navigate_to("Home")
     
     # --- PAGE STYLING ---
     st.markdown("""
@@ -1660,7 +1533,8 @@ elif page == "Skills":
 # ==========================================
 # 4. CONTACT PAGE
 # ==========================================
-elif page == "Contact":
+elif st.session_state.page == "Contact":
+    if st.button("← Back Home", key="back_contact"): navigate_to("Home")
     
     # --- PAGE STYLING ---
     st.markdown("""
@@ -1732,41 +1606,6 @@ elif page == "Contact":
     # 1. HEADER
     st.markdown("<h1 style='text-align: center; margin-bottom: 50px;'>CONTACT ME</h1>", unsafe_allow_html=True)
 
-    # 2. CONTACT INFORMATION CARDS
-    c1, c2, c3 = st.columns(3)
-
-    with c1:
-        st.markdown("""
-        <div class="contact-card">
-            <div class="icon-box">✉️</div>
-            <div class="card-title">Email</div>
-            <div class="card-link">
-                <a href="mailto:toorese@gmail.com">toorese@gmail.com</a>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with c2:
-        st.markdown("""
-        <div class="contact-card">
-            <div class="icon-box">🖥️</div>
-            <div class="card-title">GitHub</div>
-            <div class="card-link">
-                <a href="https://github.com/torelash" target="_blank">github.com/torelash</a>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with c3:
-        st.markdown("""
-        <div class="contact-card">
-            <div class="icon-box">🔗</div>
-            <div class="card-title">LinkedIn</div>
-            <div class="card-link">
-                <a href="https://www.linkedin.com/in/toorese-l/" target="_blank">linkedin.com/in/toorese-l</a>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
 
     # 3. MESSAGE FORM SECTION
     # Using layout columns to center the form visually
@@ -1795,3 +1634,12 @@ elif page == "Contact":
                         st.warning("Please fill in all fields before sending.")
 
     st.markdown('</div>', unsafe_allow_html=True)
+
+# 5. HOBBY PAGES (NBA / WNBA)
+elif st.session_state.page == "NBA":
+    if st.button("← Back Home", key="back_nba"): navigate_to("Home")
+    render_nba()
+
+elif st.session_state.page == "WNBA":
+    if st.button("← Back Home", key="back_wnba"): navigate_to("Home")
+    render_wnba()
