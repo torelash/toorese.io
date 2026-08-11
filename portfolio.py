@@ -202,34 +202,24 @@ st.markdown(f"""
         font-family: 'Spline Sans Mono', monospace; font-size: 15px; font-weight: 600;
         letter-spacing: -0.01em; color: #16130E;
     }}
-    [class*="st-key-header-nav"] div.stButton > button {{
-        background: transparent !important; border: none !important; box-shadow: none !important;
-        padding: 0 0 3px 0 !important; margin: 0 0 0 26px !important; min-height: unset !important; height: auto !important;
-        color: #6E6A60 !important; border-bottom: 1px solid transparent !important;
-        border-radius: 0 !important; text-align: left !important; width: auto !important;
-    }}
-    [class*="st-key-header-nav"] div.stButton > button:hover {{
-        color: #16130E !important; border-bottom-color: #C9C3B5 !important; background: transparent !important;
-    }}
-    [class*="st-key-header-nav"] div.stButton > button p {{
-        font-family: 'Spline Sans Mono', monospace !important; font-size: 12.5px !important; margin: 0 !important;
-    }}
-
-    /* 3c. RESEARCH-STYLE CARDS (Explore Portfolio / Analytics Hobbies) */
     [class*="st-key-card-"] {{
         border-color: #E2DDD2 !important; border-radius: 2px !important; background: #FBFAF7 !important;
+        height: 232px !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;
+    }}
+    [class*="st-key-card-"] [data-testid="stVerticalBlockBorderWrapper"] > div {{
+        height: 100% !important; display: flex !important; flex-direction: column !important;
     }}
     [class*="st-key-card-featured"] {{ border-top: 3px solid #A6402A !important; }}
     .card-eyebrow {{
-        font-family: 'Spline Sans Mono', monospace; font-size: 11.5px; letter-spacing: .04em;
-        color: #A6402A; text-transform: uppercase; margin-bottom: 14px;
+        font-family: 'Spline Sans Mono', monospace; font-size: 10.5px; letter-spacing: .04em;
+        color: #A6402A; text-transform: uppercase; margin-bottom: 12px;
     }}
-    .card-eyebrow .tag {{ color: #6E6A60; text-transform: none; margin-left: 6px; }}
+    .card-eyebrow .tag {{ color: #6E6A60; text-transform: none; margin-left: 4px; }}
     .card-title {{
-        font-family: 'Spectral', serif; font-size: 1.35rem; font-weight: 500; line-height: 1.25;
-        color: #16130E; margin-bottom: 10px;
+        font-family: 'Spectral', serif; font-size: 1.08rem; font-weight: 500; line-height: 1.25;
+        color: #16130E; margin-bottom: 8px; min-height: 2.6em;
     }}
-    .card-desc {{ font-size: 0.92rem; color: #6E6A60; line-height: 1.6; margin-bottom: 2px; }}
+    .card-desc {{ font-size: 0.78rem; color: #6E6A60; line-height: 1.5; margin-bottom: 2px; flex-grow: 1; }}
     [class*="st-key-card-"] div.stButton > button {{
         background: transparent !important; border: none !important; box-shadow: none !important;
         padding: 4px 0 0 0 !important; margin-top: 12px !important; min-height: unset !important; height: auto !important;
@@ -257,19 +247,18 @@ st.markdown(f"""
 # --- 1. HOME PAGE LOGIC ---
 if st.session_state.page == "Home":
     
-    # --- SITE HEADER (wordmark + right-aligned nav, mortaling-style) ---
+    # --- SITE HEADER (wordmark + right-aligned contact links, mortaling-style) ---
     hcol1, hcol2 = st.columns([1, 2])
     with hcol1:
         st.markdown('<div class="site-header" style="border-bottom:none; margin-bottom:0; padding-bottom:0;"><span class="wordmark">Toorese Lasebikan</span></div>', unsafe_allow_html=True)
     with hcol2:
-        with st.container(key="header-nav"):
-            n1, n2, n3 = st.columns(3)
-            with n1:
-                if st.button("Projects", key="hnav-projects"): navigate_to("Projects")
-            with n2:
-                if st.button("Skills", key="hnav-skills"): navigate_to("Skills")
-            with n3:
-                if st.button("Contact", key="hnav-contact"): navigate_to("Contact")
+        st.markdown("""
+            <div style="display:flex; justify-content:flex-end; gap:26px;">
+                <a href="mailto:toorese@gmail.com" class="link-pill" style="margin:0;">Email</a>
+                <a href="https://github.com/torelash" target="_blank" class="link-pill" style="margin:0;">GitHub</a>
+                <a href="https://linkedin.com/in/toorese-l" target="_blank" class="link-pill" style="margin:0;">LinkedIn</a>
+            </div>
+        """, unsafe_allow_html=True)
     st.markdown('<hr style="margin-top:0;">', unsafe_allow_html=True)
 
     # --- HEADER SECTION (Using standard Streamlit columns for layout) ---
@@ -282,15 +271,6 @@ if st.session_state.page == "Home":
     with c2:
         # Name & Title
         st.markdown('<div class="name-title">Toorese Lasebikan</div>', unsafe_allow_html=True)
-        
-        # Pill Links
-        st.markdown("""
-            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
-                <a href="mailto:toorese@gmail.com" class="link-pill">✉️ toorese@gmail.com</a>
-                <a href="https://github.com/torelash" target="_blank" class="link-pill">🐙 GitHub</a>
-                <a href="https://linkedin.com/in/toorese-l" target="_blank" class="link-pill">🔗 LinkedIn</a>
-            </div>
-        """, unsafe_allow_html=True)
 
     # --- BIO SECTION ---
     st.write("") # Spacer
@@ -308,30 +288,16 @@ if st.session_state.page == "Home":
     # --- NAVIGATION SECTION ---
     st.markdown("<h3 style='color:#A6402A; font-style: italic; margin-bottom: 20px;'>Explore Portfolio</h3>", unsafe_allow_html=True)
     
-    # Row 1: Main Nav — research-card style tiles
+    # research-card style tiles, one row
     nav_cards = [
-        {"key": "card-projects-featured", "eyebrow": "PROJECTS", "tag": "curated", "title": "Curated tools & models", "desc": "A working set of data-science and ML builds — dashboards, prediction models, and applied analytics.", "target": "Projects"},
-        {"key": "card-skills", "eyebrow": "SKILLS", "tag": "stack", "title": "Tech stack & expertise", "desc": "Programming, analytics, visualization, and ML — the tools behind the work.", "target": "Skills"},
-        {"key": "card-contact", "eyebrow": "CONTACT", "tag": "connect", "title": "Let's connect", "desc": "For collaborations, questions, or opportunities — get in touch.", "target": "Contact"},
+        {"key": "card-projects-featured", "eyebrow": "PROJECTS", "tag": "curated", "title": "Curated tools & models", "desc": "Dashboards, prediction models, and applied data science.", "target": "Projects"},
+        {"key": "card-skills", "eyebrow": "SKILLS", "tag": "stack", "title": "Tech stack & expertise", "desc": "Programming, analytics, visualization, and ML tools.", "target": "Skills"},
+        {"key": "card-nba", "eyebrow": "NBA", "tag": "analytics", "title": "NBA analytics", "desc": "Shot charts and performance data via the NBA API.", "target": "NBA"},
+        {"key": "card-wnba", "eyebrow": "WNBA", "tag": "analytics", "title": "WNBA analytics", "desc": "Salary cap modeling and shot-chart tools.", "target": "WNBA"},
+        {"key": "card-contact", "eyebrow": "CONTACT", "tag": "connect", "title": "Let's connect", "desc": "For collaborations, questions, or opportunities.", "target": "Contact"},
     ]
-    col1, col2, col3 = st.columns(3)
-    for col, card in zip((col1, col2, col3), nav_cards):
-        with col:
-            with st.container(key=card["key"], border=True):
-                st.markdown(f"<div class='card-eyebrow'>{card['eyebrow']} <span class='tag'>{card['tag']}</span></div>", unsafe_allow_html=True)
-                st.markdown(f"<div class='card-title'>{card['title']}</div>", unsafe_allow_html=True)
-                st.markdown(f"<div class='card-desc'>{card['desc']}</div>", unsafe_allow_html=True)
-                if st.button("Open →", key=f"btn-{card['key']}"):
-                    navigate_to(card["target"])
-
-    # Row 2: Hobbies — research-card style tiles
-    st.markdown("<h3 style='color:#A6402A; font-style: italic; margin-top: 30px; font-size: 1.2rem;'>Analytics Hobbies</h3>", unsafe_allow_html=True)
-    hobby_cards = [
-        {"key": "card-nba", "eyebrow": "NBA", "tag": "analytics", "title": "NBA analytics", "desc": "Shot charts and performance data built on the NBA API.", "target": "NBA"},
-        {"key": "card-wnba", "eyebrow": "WNBA", "tag": "analytics", "title": "WNBA analytics", "desc": "Salary cap modeling and shot-chart tools for the league.", "target": "WNBA"},
-    ]
-    hc1, hc2 = st.columns(2)
-    for col, card in zip((hc1, hc2), hobby_cards):
+    cols = st.columns(len(nav_cards))
+    for col, card in zip(cols, nav_cards):
         with col:
             with st.container(key=card["key"], border=True):
                 st.markdown(f"<div class='card-eyebrow'>{card['eyebrow']} <span class='tag'>{card['tag']}</span></div>", unsafe_allow_html=True)
