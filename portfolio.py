@@ -65,18 +65,36 @@ dark_home_css = """
         color: #16130E;
         border: 1px solid #E2DDD2;
         border-radius: 2px;
-        height: 92px;
+        height: auto;
+        min-height: 90px;
+        padding: 20px 22px;
+        text-align: left;
+        transition: all 0.2s ease;
+    }
+    div.stButton > button p {
         font-family: 'Spline Sans Mono', monospace;
+        text-align: left;
+        margin: 0;
+        line-height: 1.5;
+    }
+    div.stButton > button p:first-of-type {
         font-size: 0.95rem;
         letter-spacing: 0.03em;
-        text-transform: uppercase;
-        transition: all 0.2s ease;
+    }
+    div.stButton > button p:not(:first-of-type) {
+        font-size: 0.78rem;
+        color: #6E6A60;
+        letter-spacing: 0.01em;
+        margin-top: 6px;
     }
     div.stButton > button:hover {
         background-color: #F3E6E1;
         border-color: #A6402A;
         color: #A6402A;
         transform: none;
+    }
+    div.stButton > button:hover p:not(:first-of-type) {
+        color: #A6402A;
     }
 """
 
@@ -194,7 +212,7 @@ if st.session_state.page == "Home":
     
     with c1:
         # Profile Image
-        st.markdown('<img class="profile-img" src="https://placehold.co/400x400/faf7f1/b5502e?text=TL">', unsafe_allow_html=True)
+        st.markdown('<img class="profile-img" src="https://placehold.co/400x400/FBFAF7/A6402A?text=TL">', unsafe_allow_html=True)
         
     with c2:
         # Name & Title
@@ -212,7 +230,7 @@ if st.session_state.page == "Home":
     # --- BIO SECTION ---
     st.write("") # Spacer
     st.markdown("""
-    <div style="font-size: 1.1rem; line-height: 1.6; color: #cbd5e1; margin-top: 20px; max-width: 900px;">
+    <div style="font-size: 1.1rem; line-height: 1.7; color: #2c2822; margin-top: 20px; max-width: 900px;">
         Hi! I am Toorese. I am a data scientist who currently work in analytics at Amazon Business building metrics and machine learning programs that
         support millions of customers and improve decisions at scale. I earned my masters in Data Analytics and Policy from Carnegie Mellon University
         and my bachelors in Economics. I am especially interested in algorithmic fairness and how AI shapes outcomes in real systems. Outside of work,
