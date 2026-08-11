@@ -230,6 +230,11 @@ st.markdown(f"""
         height: 100% !important; display: flex !important; flex-direction: column !important;
     }}
     [class*="st-key-card-featured"] {{ border-top: 3px solid #A6402A !important; }}
+    [class*="st-key-card-"] .stElementContainer,
+    [class*="st-key-card-"] .stMarkdown,
+    [class*="st-key-card-"] [data-testid="stMarkdownContainer"] {{
+        width: 100% !important; max-width: 100% !important; box-sizing: border-box !important;
+    }}
     .card-eyebrow {{ display: flex; gap: 12px; align-items: baseline; margin-bottom: 15px; }}
     .card-eyebrow .t {{
         font-family: 'Spline Sans Mono', monospace; font-size: 11px; letter-spacing: .05em;
@@ -239,8 +244,12 @@ st.markdown(f"""
     .card-title {{
         font-family: 'Spectral', serif; font-size: clamp(21px, 2.3vw, 26px); font-weight: 400;
         line-height: 1.15; letter-spacing: -0.012em; color: #16130E; margin-bottom: 13px;
+        width: 100% !important; max-width: 100% !important; overflow-wrap: break-word !important; box-sizing: border-box !important;
     }}
-    .card-desc {{ color: #2c2822; font-size: 15px; line-height: 1.5; flex: 1; }}
+    .card-desc {{
+        color: #2c2822; font-size: 15px; line-height: 1.5; flex: 1;
+        width: 100% !important; max-width: 100% !important; overflow-wrap: break-word !important; box-sizing: border-box !important;
+    }}
     [class*="st-key-card-"] div.stButton > button {{
         background: transparent !important; border: none !important; box-shadow: none !important;
         padding: 4px 0 0 0 !important; margin-top: 20px !important; min-height: unset !important; height: auto !important;
