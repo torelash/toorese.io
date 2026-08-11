@@ -221,10 +221,10 @@ st.markdown(f"""
     }}
     .carrow-btn:hover {{ border-color: #A6402A; color: #A6402A; }}
     [class*="st-key-card-"] {{
-        border-color: #E2DDD2 !important; border-radius: 2px !important; background: #FBFAF7 !important;
-        height: 280px !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;
+        border-color: #E2DDD2 !important; border-radius: 2px !important; background: #fdfcfa !important;
+        min-height: 300px !important; height: auto !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;
         flex: 0 0 340px !important; width: 340px !important; scroll-snap-align: start !important;
-        padding: 8px 4px !important;
+        padding: 30px 30px 24px !important;
     }}
     [class*="st-key-card-"] [data-testid="stVerticalBlockBorderWrapper"] > div {{
         height: 100% !important; display: flex !important; flex-direction: column !important;
