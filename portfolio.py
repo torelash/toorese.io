@@ -202,27 +202,47 @@ st.markdown(f"""
         font-family: 'Spline Sans Mono', monospace; font-size: 15px; font-weight: 600;
         letter-spacing: -0.01em; color: #16130E;
     }}
+    /* horizontal scroll row (mirrors mortaling.ai's .hcar) */
+    [class*="st-key-research-scroll"] {{
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory !important;
+        gap: 22px !important;
+        padding: 4px 4px 20px !important;
+        scrollbar-width: thin;
+    }}
+    [class*="st-key-research-scroll"]::-webkit-scrollbar {{ height: 6px; }}
+    [class*="st-key-research-scroll"]::-webkit-scrollbar-thumb {{ background: #C9C3B5; border-radius: 3px; }}
+    .carrow-btn {{
+        font-family: 'Spline Sans Mono', monospace; font-size: 16px; line-height: 1;
+        width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+        background: none; border: 1px solid #C9C3B5; color: #16130E; cursor: pointer; transition: .15s; padding: 0;
+    }}
+    .carrow-btn:hover {{ border-color: #A6402A; color: #A6402A; }}
     [class*="st-key-card-"] {{
         border-color: #E2DDD2 !important; border-radius: 2px !important; background: #FBFAF7 !important;
-        height: 232px !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;
+        height: 280px !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;
+        flex: 0 0 340px !important; width: 340px !important; scroll-snap-align: start !important;
+        padding: 8px 4px !important;
     }}
     [class*="st-key-card-"] [data-testid="stVerticalBlockBorderWrapper"] > div {{
         height: 100% !important; display: flex !important; flex-direction: column !important;
     }}
     [class*="st-key-card-featured"] {{ border-top: 3px solid #A6402A !important; }}
     .card-eyebrow {{
-        font-family: 'Spline Sans Mono', monospace; font-size: 10.5px; letter-spacing: .04em;
-        color: #A6402A; text-transform: uppercase; margin-bottom: 12px;
+        font-family: 'Spline Sans Mono', monospace; font-size: 12px; letter-spacing: .04em;
+        color: #A6402A; text-transform: uppercase; margin-bottom: 18px;
     }}
-    .card-eyebrow .tag {{ color: #6E6A60; text-transform: none; margin-left: 4px; }}
+    .card-eyebrow .tag {{ color: #6E6A60; text-transform: none; margin-left: 6px; }}
     .card-title {{
-        font-family: 'Spectral', serif; font-size: 1.08rem; font-weight: 500; line-height: 1.25;
-        color: #16130E; margin-bottom: 8px; min-height: 2.6em;
+        font-family: 'Spectral', serif; font-size: 1.3rem; font-weight: 500; line-height: 1.28;
+        color: #16130E; margin-bottom: 12px; min-height: 2.6em;
     }}
-    .card-desc {{ font-size: 0.78rem; color: #6E6A60; line-height: 1.5; margin-bottom: 2px; flex-grow: 1; }}
+    .card-desc {{ font-size: 0.9rem; color: #6E6A60; line-height: 1.6; margin-bottom: 2px; flex-grow: 1; }}
     [class*="st-key-card-"] div.stButton > button {{
         background: transparent !important; border: none !important; box-shadow: none !important;
-        padding: 4px 0 0 0 !important; margin-top: 12px !important; min-height: unset !important; height: auto !important;
+        padding: 4px 0 0 0 !important; margin-top: 16px !important; min-height: unset !important; height: auto !important;
         color: #A6402A !important; border-bottom: 1px solid #f3e6e1 !important; border-radius: 0 !important;
         text-align: left !important; width: auto !important;
     }}
@@ -230,7 +250,7 @@ st.markdown(f"""
         color: #A6402A !important; border-bottom-color: #A6402A !important; background: transparent !important;
     }}
     [class*="st-key-card-"] div.stButton > button p {{
-        font-family: 'Spline Sans Mono', monospace !important; font-size: 12.5px !important; margin: 0 !important;
+        font-family: 'Spline Sans Mono', monospace !important; font-size: 13px !important; margin: 0 !important;
     }}
 
     /* 4. ACTIVE THEME (Injected) */
@@ -286,19 +306,26 @@ if st.session_state.page == "Home":
     st.write("---") # Divider line
 
     # --- NAVIGATION SECTION ---
-    st.markdown("<h3 style='color:#A6402A; font-style: italic; margin-bottom: 20px;'>Explore Portfolio</h3>", unsafe_allow_html=True)
+    st.markdown("""
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;">
+            <h3 style="color:#A6402A; font-style: italic; margin:0;">Explore Portfolio</h3>
+            <div style="display:flex; gap:8px;">
+                <button class="carrow-btn" onclick="document.querySelector('[class*=st-key-research-scroll]').scrollBy({left:-362, behavior:'smooth'})">&lsaquo;</button>
+                <button class="carrow-btn" onclick="document.querySelector('[class*=st-key-research-scroll]').scrollBy({left:362, behavior:'smooth'})">&rsaquo;</button>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
     
-    # research-card style tiles, one row
+    # research-card style tiles — one true horizontal-scroll row (mirrors mortaling.ai's .hcar/.rcard)
     nav_cards = [
-        {"key": "card-projects-featured", "eyebrow": "PROJECTS", "tag": "curated", "title": "Curated tools & models", "desc": "Dashboards, prediction models, and applied data science.", "target": "Projects"},
-        {"key": "card-skills", "eyebrow": "SKILLS", "tag": "stack", "title": "Tech stack & expertise", "desc": "Programming, analytics, visualization, and ML tools.", "target": "Skills"},
-        {"key": "card-nba", "eyebrow": "NBA", "tag": "analytics", "title": "NBA analytics", "desc": "Shot charts and performance data via the NBA API.", "target": "NBA"},
-        {"key": "card-wnba", "eyebrow": "WNBA", "tag": "analytics", "title": "WNBA analytics", "desc": "Salary cap modeling and shot-chart tools.", "target": "WNBA"},
-        {"key": "card-contact", "eyebrow": "CONTACT", "tag": "connect", "title": "Let's connect", "desc": "For collaborations, questions, or opportunities.", "target": "Contact"},
+        {"key": "card-projects-featured", "eyebrow": "PROJECTS", "tag": "curated", "title": "Curated tools & models", "desc": "A working set of data-science and ML builds — dashboards, prediction models, and applied analytics.", "target": "Projects"},
+        {"key": "card-skills", "eyebrow": "SKILLS", "tag": "stack", "title": "Tech stack & expertise", "desc": "Programming, analytics, visualization, and the ML tools behind the work.", "target": "Skills"},
+        {"key": "card-nba", "eyebrow": "NBA", "tag": "analytics", "title": "NBA analytics", "desc": "Shot charts and performance data built on the NBA API.", "target": "NBA"},
+        {"key": "card-wnba", "eyebrow": "WNBA", "tag": "analytics", "title": "WNBA analytics", "desc": "Salary cap modeling and shot-chart tools for the league.", "target": "WNBA"},
+        {"key": "card-contact", "eyebrow": "CONTACT", "tag": "connect", "title": "Let's connect", "desc": "For collaborations, questions, or opportunities — get in touch.", "target": "Contact"},
     ]
-    cols = st.columns(len(nav_cards))
-    for col, card in zip(cols, nav_cards):
-        with col:
+    with st.container(key="research-scroll"):
+        for card in nav_cards:
             with st.container(key=card["key"], border=True):
                 st.markdown(f"<div class='card-eyebrow'>{card['eyebrow']} <span class='tag'>{card['tag']}</span></div>", unsafe_allow_html=True)
                 st.markdown(f"<div class='card-title'>{card['title']}</div>", unsafe_allow_html=True)
