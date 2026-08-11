@@ -47,74 +47,75 @@ def navigate_to(page_name):
 
 # A. DEFINE THE CSS FOR EACH THEME
 dark_home_css = """
-    /* DARK THEME BACKGROUND */
+    /* EDITORIAL CREAM BACKGROUND (Home) */
     .stApp {
-        background-color: #0f1219;
-        background-image: radial-gradient(circle at 50% 0%, #2d3748 0%, #0f1219 70%);
-        background-attachment: fixed;
-        background-size: cover;
+        background-color: #FBFAF7;
+        background-image: none;
     }
     
-    /* LIGHT TEXT FOR DARK BACKGROUND */
     h1, h2, h3, h4, h5, p, div, span, label {
-        color: #e2e8f0;
+        color: #16130E;
     }
-    .stMarkdown, .stText { color: #cbd5e1; }
+    .stMarkdown, .stText { color: #6E6A60; }
     
-    /* PREMIUM BUTTONS (Gold/Glass) */
+    /* FLAT MONOSPACE NAV BUTTONS */
     div.stButton > button {
         width: 100%;
-        background-color: rgba(255, 255, 255, 0.05);
-        color: #f1e5ac;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        height: 100px;
-        font-family: 'Playfair Display', serif;
-        font-size: 1.5rem;
-        transition: all 0.3s ease;
+        background-color: transparent;
+        color: #16130E;
+        border: 1px solid #E2DDD2;
+        border-radius: 2px;
+        height: 92px;
+        font-family: 'Spline Sans Mono', monospace;
+        font-size: 0.95rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        transition: all 0.2s ease;
     }
     div.stButton > button:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        border-color: #f1e5ac;
-        color: #fff;
-        transform: translateY(-3px);
+        background-color: #F3E6E1;
+        border-color: #A6402A;
+        color: #A6402A;
+        transform: none;
     }
 """
 
 light_content_css = """
-    /* LIGHT THEME BACKGROUND */
+    /* EDITORIAL CREAM BACKGROUND (Content pages) */
     .stApp {
-        background-color: #ffffff;
+        background-color: #FBFAF7;
         background-image: none;
     }
     
     /* RESET TEXT COLORS */
     h1, h2, h3, .name-title {
-        color: #1a1a1a;
+        color: #16130E;
+        font-family: 'Spectral', serif;
     }
     
-    /* SIMPLE 'BACK' BUTTON STYLING */
+    /* FLAT MONOSPACE 'BACK' BUTTON */
     div.stButton > button {
-        background-color: #f0f2f6;
-        color: #31333f;
-        border: 1px solid #dce0e6;
-        border-radius: 8px;
+        background-color: transparent;
+        color: #6E6A60;
+        border: 1px solid #E2DDD2;
+        border-radius: 2px;
         padding: 5px 15px;
-        font-weight: 600;
+        font-family: 'Spline Sans Mono', monospace;
+        font-weight: 400;
+        font-size: 0.85rem;
     }
     div.stButton > button:hover {
-        border-color: #0066ff;
-        color: #0066ff;
+        border-color: #A6402A;
+        color: #A6402A;
     }
 
-    /* --- RESTORE UNIVERSAL METRIC CARDS (THICKER VERSION) --- */
+    /* --- HAIRLINE METRIC CARDS --- */
     div[data-testid="stMetric"] {
-        background-color: #ffffff;
-        border: 1px solid #e0e0e0;
-        /* UPDATED PADDING: 25px top/bottom makes it look thicker */
-        padding: 25px 15px;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.08); /* Slightly stronger shadow for depth */
+        background-color: #FBFAF7;
+        border: 1px solid #E2DDD2;
+        padding: 22px 15px;
+        border-radius: 2px;
+        box-shadow: none;
         text-align: center;
         width: 100%;
     }
@@ -137,35 +138,42 @@ else:
 st.markdown(f"""
 <style>
     /* 1. GLOBAL FONTS (Always Apply) */
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@300;400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Spline+Sans+Mono:wght@400;500;600&display=swap');
     
     html, body, [class*="css"] {{
-        font-family: 'Lato', sans-serif;
+        font-family: 'Spectral', Georgia, serif;
     }}
     h1, h2, h3, .name-title, .nav-header {{
-        font-family: 'Playfair Display', serif;
+        font-family: 'Spectral', serif;
+        font-weight: 600;
+    }}
+    .mono-label {{
+        font-family: 'Spline Sans Mono', monospace;
+        letter-spacing: 0.03em;
     }}
     
     /* 2. HIDE SIDEBAR (Always) */
     [data-testid="stSidebar"] {{ display: none; }}
     header {{ visibility: hidden; }}
-    .block-container {{ padding-top: 2rem; max-width: 1100px; }}
+    .block-container {{ padding-top: 4rem; max-width: 980px; }}
+    hr {{ border-color: #E2DDD2 !important; }}
 
     /* 3. HOME PAGE SPECIFIC CLASSES (Profile, Pills, Bio) */
     .profile-img {{ 
-        width: 160px; height: 160px; border-radius: 50%; object-fit: cover; 
-        border: 3px solid rgba(212, 175, 55, 0.6); box-shadow: 0 0 25px rgba(212, 175, 55, 0.2); 
+        width: 132px; height: 132px; border-radius: 50%; object-fit: cover; 
+        border: 1px solid #E2DDD2; box-shadow: none; 
     }}
-    .name-title {{ font-size: 3.5rem; font-weight: 700; color: #f1e5ac; margin-bottom: 10px; line-height: 1.1; }}
-    .bio-text {{ font-size: 1.1rem; line-height: 1.6; color: #cbd5e1; font-weight: 300; }}
+    .name-title {{ font-size: 3rem; font-weight: 500; font-style: italic; color: #16130E; margin-bottom: 6px; line-height: 1.15; }}
+    .bio-text {{ font-size: 1.05rem; line-height: 1.8; color: #6E6A60; font-weight: 400; }}
     
     .link-pill {{ 
-        text-decoration: none; background: rgba(255,255,255,0.08); 
-        color: #cbd5e1 !important; padding: 6px 16px; border-radius: 20px; 
-        font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.1); 
-        margin-right: 10px; transition: all 0.3s ease; display: inline-block; margin-top: 5px;
+        text-decoration: none; background: transparent; 
+        color: #6E6A60 !important; padding: 4px 0; border-radius: 0; 
+        font-size: 0.82rem; font-family: 'Spline Sans Mono', monospace; letter-spacing: 0.02em;
+        border: none; border-bottom: 1px solid #C9C3B5;
+        margin-right: 22px; transition: all 0.2s ease; display: inline-block; margin-top: 5px;
     }}
-    .link-pill:hover {{ border-color: #f1e5ac; color: #f1e5ac !important; }}
+    .link-pill:hover {{ border-color: #A6402A; color: #A6402A !important; }}
 
     /* 4. ACTIVE THEME (Injected) */
     {active_css}
@@ -186,7 +194,7 @@ if st.session_state.page == "Home":
     
     with c1:
         # Profile Image
-        st.markdown('<img class="profile-img" src="https://placehold.co/400x400/1a1f2c/f1e5ac?text=TL">', unsafe_allow_html=True)
+        st.markdown('<img class="profile-img" src="https://placehold.co/400x400/faf7f1/b5502e?text=TL">', unsafe_allow_html=True)
         
     with c2:
         # Name & Title
@@ -215,7 +223,7 @@ if st.session_state.page == "Home":
     st.write("---") # Divider line
 
     # --- NAVIGATION SECTION ---
-    st.markdown("<h3 style='color:#f1e5ac; margin-bottom: 20px;'>Explore Portfolio</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#A6402A; font-style: italic; margin-bottom: 20px;'>Explore Portfolio</h3>", unsafe_allow_html=True)
     
     # Row 1: Main Nav
     col1, col2, col3 = st.columns(3)
@@ -231,7 +239,7 @@ if st.session_state.page == "Home":
 
     # Row 2: Hobbies
     # Hobbies Grid
-    st.markdown("<h3 style='color:#f1e5ac; margin-top: 30px; font-size: 1.2rem;'>Analytics Hobbies</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#A6402A; font-style: italic; margin-top: 30px; font-size: 1.2rem;'>Analytics Hobbies</h3>", unsafe_allow_html=True)
     h1, h2 = st.columns(2)
     with h1:
         if st.button("🏀 NBA ANALYTICS"): navigate_to("NBA")
@@ -1471,36 +1479,39 @@ elif st.session_state.page == "Skills":
     <style>
         .skill-badge {
             display: inline-block;
-            background-color: #e6f0ff;
-            color: #0066ff;
-            padding: 6px 14px;
+            background-color: transparent;
+            color: #6E6A60;
+            padding: 5px 14px;
             border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.8rem;
+            font-family: 'Spline Sans Mono', monospace;
+            font-weight: 400;
             margin: 4px 4px 4px 0;
-            border: 1px solid #cce0ff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            border: 1px solid #E2DDD2;
+            box-shadow: none;
         }
         .category-header {
-            font-weight: 700;
-            font-size: 1.1rem;
+            font-family: 'Spectral', serif;
+            font-style: italic;
+            font-weight: 600;
+            font-size: 1.15rem;
             margin-bottom: 12px;
-            color: #1a1a1a;
+            color: #16130E;
             display: flex;
             align-items: center;
             gap: 8px;
         }
         .context-box {
-            background-color: #ffffff;
+            background-color: #FBFAF7;
             padding: 25px;
-            border-radius: 10px;
-            border: 1px solid #e0e0e0;
-            border-left: 5px solid #0066ff;
+            border-radius: 2px;
+            border: 1px solid #E2DDD2;
+            border-left: 3px solid #A6402A;
             margin-top: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: none;
             font-size: 1.05rem;
-            color: #444;
-            line-height: 1.6;
+            color: #6E6A60;
+            line-height: 1.7;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -1591,51 +1602,52 @@ elif st.session_state.page == "Contact":
         
         /* CONTACT CARDS */
         .contact-card {
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
+            background-color: #FBFAF7;
+            border: 1px solid #E2DDD2;
+            border-radius: 2px;
             padding: 30px 20px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
+            box-shadow: none;
+            transition: all 0.2s ease;
             height: 100%;
             cursor: pointer;
         }
         .contact-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(0, 102, 255, 0.15);
-            border-color: #0066ff;
+            transform: translateY(-4px);
+            box-shadow: none;
+            border-color: #A6402A;
         }
         .icon-box {
             font-size: 3rem;
             margin-bottom: 15px;
         }
         .card-title {
-            font-size: 0.9rem;
+            font-family: 'Spline Sans Mono', monospace;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #888;
+            color: #6E6A60;
             margin-bottom: 8px;
-            font-weight: 600;
+            font-weight: 400;
         }
         .card-link a {
             text-decoration: none;
-            color: #1a1a1a;
+            color: #16130E;
             font-size: 1.1rem;
             font-weight: 700;
             word-wrap: break-word;
         }
         .card-link a:hover {
-            color: #0066ff;
+            color: #A6402A;
         }
 
         /* FORM CONTAINER */
         .form-box {
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            border-radius: 15px;
+            background-color: #FBFAF7;
+            border: 1px solid #E2DDD2;
+            border-radius: 2px;
             padding: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-shadow: none;
             margin-top: 40px;
         }
     </style>
