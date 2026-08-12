@@ -26,6 +26,12 @@ st.set_page_config(
 if 'page' not in st.session_state:
     st.session_state.page = "Home"
 
+# Allow real <a href="?page=X"> links (used by the HTML card carousel) to drive navigation
+_qp_page = st.query_params.get("page")
+if _qp_page and _qp_page != st.session_state.page:
+    st.session_state.page = _qp_page
+    st.query_params.clear()
+
 # --- SESSION STATE INITIALIZATION ---
 if 'show_toast' not in st.session_state:
     st.session_state.show_toast = False
@@ -202,69 +208,6 @@ st.markdown(f"""
         font-family: 'Spline Sans Mono', monospace; font-size: 15px; font-weight: 600;
         letter-spacing: -0.01em; color: #16130E;
     }}
-    /* horizontal scroll row (mirrors mortaling.ai's .hcar) */
-    [class*="st-key-research-scroll"] {{
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        scroll-snap-type: x mandatory !important;
-        gap: 22px !important;
-        padding: 4px 4px 20px !important;
-        scrollbar-width: none !important;
-    }}
-    [class*="st-key-research-scroll"]::-webkit-scrollbar {{ display: none !important; }}
-    .carrow-btn {{
-        font-family: 'Spline Sans Mono', monospace; font-size: 16px; line-height: 1;
-        width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
-        background: none; border: 1px solid #C9C3B5; color: #16130E; cursor: pointer; transition: .15s; padding: 0;
-    }}
-    .carrow-btn:hover {{ border-color: #A6402A; color: #A6402A; }}
-    .carrow-btn:disabled {{ opacity: .3; cursor: default; border-color: #E2DDD2; }}
-    [class*="st-key-card-"] {{
-        border-color: #E2DDD2 !important; border-radius: 2px !important; background: #fdfcfa !important;
-        min-height: 300px !important; height: auto !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;
-        flex: 0 0 360px !important; width: 360px !important; min-width: 360px !important; max-width: 360px !important;
-        scroll-snap-align: start !important;
-        padding: 30px 30px 24px !important; box-sizing: border-box !important; overflow: hidden !important;
-    }}
-    [class*="st-key-card-"] [data-testid="stVerticalBlockBorderWrapper"] > div {{
-        height: 100% !important; display: flex !important; flex-direction: column !important;
-    }}
-    [class*="st-key-card-featured"] {{ border-top: 3px solid #A6402A !important; }}
-    [class*="st-key-card-"] .stElementContainer,
-    [class*="st-key-card-"] .stMarkdown,
-    [class*="st-key-card-"] [data-testid="stMarkdownContainer"] {{
-        width: 300px !important; max-width: 300px !important; box-sizing: border-box !important;
-    }}
-    .card-eyebrow {{ display: flex; gap: 12px; align-items: baseline; margin-bottom: 15px; width: 300px !important; }}
-    .card-eyebrow .t {{
-        font-family: 'Spline Sans Mono', monospace; font-size: 11px; letter-spacing: .05em;
-        text-transform: uppercase; color: #A6402A;
-    }}
-    .card-eyebrow .s {{ font-family: 'Spline Sans Mono', monospace; font-size: 11px; color: #6E6A60; }}
-    .card-title {{
-        font-family: 'Spectral', serif; font-size: clamp(21px, 2.3vw, 26px); font-weight: 400;
-        line-height: 1.15; letter-spacing: -0.012em; color: #16130E; margin-bottom: 13px;
-        width: 300px !important; max-width: 300px !important; white-space: normal !important;
-        overflow-wrap: break-word !important; word-wrap: break-word !important; box-sizing: border-box !important;
-    }}
-    .card-desc {{
-        color: #2c2822; font-size: 15px; line-height: 1.5; flex: 1;
-        width: 300px !important; max-width: 300px !important; white-space: normal !important;
-        overflow-wrap: break-word !important; word-wrap: break-word !important; box-sizing: border-box !important;
-    }}
-    [class*="st-key-card-"] div.stButton > button {{
-        background: transparent !important; border: none !important; box-shadow: none !important;
-        padding: 4px 0 0 0 !important; margin-top: 20px !important; min-height: unset !important; height: auto !important;
-        color: #A6402A !important; border-bottom: 1px solid #f3e6e1 !important; border-radius: 0 !important;
-        text-align: left !important; width: auto !important;
-    }}
-    [class*="st-key-card-"] div.stButton > button:hover {{
-        color: #A6402A !important; border-bottom-color: #A6402A !important; background: transparent !important;
-    }}
-    [class*="st-key-card-"] div.stButton > button p {{
-        font-family: 'Spline Sans Mono', monospace !important; font-size: 12px !important; margin: 0 !important;
-    }}
 
     /* 4. ACTIVE THEME (Injected) */
     {active_css}
@@ -318,49 +261,84 @@ if st.session_state.page == "Home":
     
     st.write("---") # Divider line
 
-    # --- NAVIGATION SECTION ---
-    st.markdown("""
-        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:24px;">
-            <h3 style="color:#A6402A; font-style: italic; margin:0;">Explore Portfolio</h3>
-            <div style="display:flex; gap:8px;">
-                <button class="carrow-btn" id="cprev" aria-label="previous" disabled>&lsaquo;</button>
-                <button class="carrow-btn" id="cnext" aria-label="next">&rsaquo;</button>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # research-card style tiles — one true horizontal-scroll row (mirrors mortaling.ai's .hcar/.rcard)
+    # --- NAVIGATION SECTION — self-contained HTML component (own iframe, no Streamlit layout interference) ---
     nav_cards = [
-        {"key": "card-projects-featured", "t": "PROJECTS", "s": "curated", "title": "Curated tools & models", "desc": "A working set of data-science and ML builds — dashboards, prediction models, and applied analytics.", "target": "Projects"},
-        {"key": "card-skills", "t": "SKILLS", "s": "stack", "title": "Tech stack & expertise", "desc": "Programming, analytics, visualization, and the ML tools behind the work.", "target": "Skills"},
-        {"key": "card-nba", "t": "NBA", "s": "analytics", "title": "NBA analytics", "desc": "Shot charts and performance data built on the NBA API.", "target": "NBA"},
-        {"key": "card-wnba", "t": "WNBA", "s": "analytics", "title": "WNBA analytics", "desc": "Salary cap modeling and shot-chart tools for the league.", "target": "WNBA"},
-        {"key": "card-contact", "t": "CONTACT", "s": "connect", "title": "Let's connect", "desc": "For collaborations, questions, or opportunities — get in touch.", "target": "Contact"},
+        {"t": "PROJECTS", "s": "curated", "title": "Curated tools &amp; models", "desc": "A working set of data-science and ML builds — dashboards, prediction models, and applied analytics.", "target": "Projects", "flag": True},
+        {"t": "SKILLS", "s": "stack", "title": "Tech stack &amp; expertise", "desc": "Programming, analytics, visualization, and the ML tools behind the work.", "target": "Skills", "flag": False},
+        {"t": "NBA", "s": "analytics", "title": "NBA analytics", "desc": "Shot charts and performance data built on the NBA API.", "target": "NBA", "flag": False},
+        {"t": "WNBA", "s": "analytics", "title": "WNBA analytics", "desc": "Salary cap modeling and shot-chart tools for the league.", "target": "WNBA", "flag": False},
+        {"t": "CONTACT", "s": "connect", "title": "Let's connect", "desc": "For collaborations, questions, or opportunities — get in touch.", "target": "Contact", "flag": False},
     ]
-    with st.container(key="research-scroll"):
-        for card in nav_cards:
-            with st.container(key=card["key"], border=True):
-                st.markdown(f"<div class='card-eyebrow'><span class='t'>{card['t']}</span><span class='s'>{card['s']}</span></div>", unsafe_allow_html=True)
-                st.markdown(f"<div class='card-title'>{card['title']}</div>", unsafe_allow_html=True)
-                st.markdown(f"<div class='card-desc'>{card['desc']}</div>", unsafe_allow_html=True)
-                if st.button("Open →", key=f"btn-{card['key']}"):
-                    navigate_to(card["target"])
+    _cards_html = ""
+    for c in nav_cards:
+        _flag_class = " flag" if c["flag"] else ""
+        _cards_html += f"""
+        <div class="rcard{_flag_class}">
+            <div class="rtag"><span class="t">{c['t']}</span><span class="s">{c['s']}</span></div>
+            <h3>{c['title']}</h3>
+            <p class="desc">{c['desc']}</p>
+            <div class="rlinks"><a href="?page={c['target']}" target="_top">Open →</a></div>
+        </div>"""
 
-    # exact port of research.html's carousel script — dynamic step from card width, disabled at scroll ends
-    st.markdown("""
-        <script>
-        (function(){
-            var car = document.querySelector('[class*="st-key-research-scroll"]'); if(!car) return;
+    _carousel_html = f"""
+    <style>
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ font-family: 'Spectral', Georgia, serif; background: #FBFAF7; }}
+        .chead {{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:24px; padding: 4px 4px 0; }}
+        .chead h3 {{ font-family:'Spectral',serif; color:#A6402A; font-style:italic; font-weight:600; font-size:1.3rem; margin:0; }}
+        .carrows {{ display:flex; gap:8px; }}
+        .carrow {{
+            font-family:'Spline Sans Mono',monospace; font-size:16px; line-height:1;
+            width:34px; height:34px; display:flex; align-items:center; justify-content:center;
+            background:none; border:1px solid #C9C3B5; color:#16130E; cursor:pointer; transition:.15s; padding:0;
+        }}
+        .carrow:hover {{ border-color:#A6402A; color:#A6402A; }}
+        .carrow:disabled {{ opacity:.3; cursor:default; border-color:#E2DDD2; }}
+        .hcar {{
+            display:flex; gap:22px; overflow-x:auto; scroll-snap-type:x mandatory;
+            padding:4px 4px 20px; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+        }}
+        .hcar::-webkit-scrollbar {{ display:none; }}
+        .rcard {{
+            flex:0 0 40%; min-width:340px; scroll-snap-align:start; border:1px solid #E2DDD2;
+            padding:30px 30px 24px; display:flex; flex-direction:column; min-height:300px; background:#fdfcfa;
+        }}
+        .rcard.flag {{ border-top:3px solid #A6402A; }}
+        .rtag {{ display:flex; gap:12px; align-items:baseline; margin-bottom:15px; }}
+        .rtag .t {{ font-family:'Spline Sans Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:#A6402A; }}
+        .rtag .s {{ font-family:'Spline Sans Mono',monospace; font-size:11px; color:#6E6A60; }}
+        .rcard h3 {{ font-family:'Spectral',serif; font-size:clamp(21px,2.3vw,26px); font-weight:400; line-height:1.15; letter-spacing:-0.012em; color:#16130E; margin-bottom:13px; }}
+        .rcard .desc {{ color:#2c2822; font-size:15px; line-height:1.5; flex:1; }}
+        .rlinks {{ margin-top:20px; }}
+        .rlinks a {{
+            font-family:'Spline Sans Mono',monospace; font-size:12px; color:#A6402A; text-decoration:none;
+            border-bottom:1px solid #f3e6e1; padding-bottom:2px; transition:.15s;
+        }}
+        .rlinks a:hover {{ border-bottom-color:#A6402A; }}
+    </style>
+    <div class="chead">
+        <h3>Explore Portfolio</h3>
+        <div class="carrows">
+            <button class="carrow" id="cprev" aria-label="previous" disabled>&lsaquo;</button>
+            <button class="carrow" id="cnext" aria-label="next">&rsaquo;</button>
+        </div>
+    </div>
+    <div class="hcar" id="hcar">{_cards_html}
+    </div>
+    <script>
+        (function(){{
+            var car = document.getElementById('hcar');
             var prev = document.getElementById('cprev'), next = document.getElementById('cnext');
-            function step(){ var c = car.querySelector('[class*="st-key-card-"]'); return c ? c.offsetWidth+22 : 360; }
-            function upd(){ var max = car.scrollWidth-car.clientWidth-4;
-                prev.disabled = car.scrollLeft<=2; next.disabled = car.scrollLeft>=max; }
-            next.onclick = function(){ car.scrollBy({left: step(), behavior:'smooth'}); };
-            prev.onclick = function(){ car.scrollBy({left: -step(), behavior:'smooth'}); };
-            car.addEventListener('scroll', upd, {passive:true}); upd();
-        })();
-        </script>
-    """, unsafe_allow_html=True)
+            function step(){{ var c = car.querySelector('.rcard'); return c ? c.offsetWidth+22 : 360; }}
+            function upd(){{ var max = car.scrollWidth-car.clientWidth-4;
+                prev.disabled = car.scrollLeft<=2; next.disabled = car.scrollLeft>=max; }}
+            next.onclick = function(){{ car.scrollBy({{left: step(), behavior:'smooth'}}); }};
+            prev.onclick = function(){{ car.scrollBy({{left: -step(), behavior:'smooth'}}); }};
+            car.addEventListener('scroll', upd, {{passive:true}}); upd();
+        }})();
+    </script>
+    """
+    st.components.v1.html(_carousel_html, height=420, scrolling=False)
 
 
 # --- SMART DATA LOADER (COMBINED FIX) ---
