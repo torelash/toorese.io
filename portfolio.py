@@ -277,7 +277,7 @@ if st.session_state.page == "Home":
             <div class="rtag"><span class="t">{c['t']}</span><span class="s">{c['s']}</span></div>
             <h3>{c['title']}</h3>
             <p class="desc">{c['desc']}</p>
-            <div class="rlinks"><a href="?page={c['target']}" target="_top">Open →</a></div>
+            <div class="rlinks"><a href="?page={c['target']}" target="_blank">Open →</a></div>
         </div>"""
 
     _carousel_html = f"""
