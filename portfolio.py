@@ -223,8 +223,9 @@ st.markdown(f"""
     [class*="st-key-card-"] {{
         border-color: #E2DDD2 !important; border-radius: 2px !important; background: #fdfcfa !important;
         min-height: 300px !important; height: auto !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;
-        flex: 0 0 40% !important; min-width: 340px !important; scroll-snap-align: start !important;
-        padding: 30px 30px 24px !important;
+        flex: 0 0 360px !important; width: 360px !important; min-width: 360px !important; max-width: 360px !important;
+        scroll-snap-align: start !important;
+        padding: 30px 30px 24px !important; box-sizing: border-box !important; overflow: hidden !important;
     }}
     [class*="st-key-card-"] [data-testid="stVerticalBlockBorderWrapper"] > div {{
         height: 100% !important; display: flex !important; flex-direction: column !important;
@@ -233,9 +234,9 @@ st.markdown(f"""
     [class*="st-key-card-"] .stElementContainer,
     [class*="st-key-card-"] .stMarkdown,
     [class*="st-key-card-"] [data-testid="stMarkdownContainer"] {{
-        width: 100% !important; max-width: 100% !important; box-sizing: border-box !important;
+        width: 300px !important; max-width: 300px !important; box-sizing: border-box !important;
     }}
-    .card-eyebrow {{ display: flex; gap: 12px; align-items: baseline; margin-bottom: 15px; }}
+    .card-eyebrow {{ display: flex; gap: 12px; align-items: baseline; margin-bottom: 15px; width: 300px !important; }}
     .card-eyebrow .t {{
         font-family: 'Spline Sans Mono', monospace; font-size: 11px; letter-spacing: .05em;
         text-transform: uppercase; color: #A6402A;
@@ -244,11 +245,13 @@ st.markdown(f"""
     .card-title {{
         font-family: 'Spectral', serif; font-size: clamp(21px, 2.3vw, 26px); font-weight: 400;
         line-height: 1.15; letter-spacing: -0.012em; color: #16130E; margin-bottom: 13px;
-        width: 100% !important; max-width: 100% !important; overflow-wrap: break-word !important; box-sizing: border-box !important;
+        width: 300px !important; max-width: 300px !important; white-space: normal !important;
+        overflow-wrap: break-word !important; word-wrap: break-word !important; box-sizing: border-box !important;
     }}
     .card-desc {{
         color: #2c2822; font-size: 15px; line-height: 1.5; flex: 1;
-        width: 100% !important; max-width: 100% !important; overflow-wrap: break-word !important; box-sizing: border-box !important;
+        width: 300px !important; max-width: 300px !important; white-space: normal !important;
+        overflow-wrap: break-word !important; word-wrap: break-word !important; box-sizing: border-box !important;
     }}
     [class*="st-key-card-"] div.stButton > button {{
         background: transparent !important; border: none !important; box-shadow: none !important;
