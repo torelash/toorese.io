@@ -189,6 +189,29 @@ st.markdown(f"""
     }}
     .name-title {{ font-size: 3rem; font-weight: 500; font-style: italic; color: #16130E; margin-bottom: 6px; line-height: 1.15; }}
     .bio-text {{ font-size: 1.05rem; line-height: 1.8; color: #6E6A60; font-weight: 400; }}
+    .kicker {{
+        font-family: 'Spline Sans Mono', monospace; font-size: 12px; letter-spacing: .02em;
+        color: #A6402A; margin-bottom: 14px; display: flex; align-items: center; gap: 12px;
+    }}
+    .kicker::before {{ content: ""; width: 22px; height: 1px; background: #A6402A; }}
+    .standfirst {{
+        font-size: 1.2rem; font-weight: 300; color: #34302a; line-height: 1.5;
+        margin-top: 10px; margin-bottom: 4px; max-width: 56ch;
+    }}
+    @keyframes fadeInUp {{ from {{ opacity: 0; transform: translateY(12px); }} to {{ opacity: 1; transform: none; }} }}
+    .reveal {{ animation: fadeInUp .7s ease-out both; }}
+    .site-footer {{
+        margin-top: 60px; padding: 36px 0 20px; border-top: 1px solid #C9C3B5;
+        display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;
+    }}
+    .site-footer .who {{ font-size: 0.92rem; color: #6E6A60; max-width: 46ch; line-height: 1.55; }}
+    .site-footer .who strong {{ color: #16130E; font-weight: 500; }}
+    .site-footer .flinks {{ display: flex; flex-direction: column; gap: 6px; text-align: right; }}
+    .site-footer .flinks a {{
+        font-family: 'Spline Sans Mono', monospace; font-size: 12px; color: #6E6A60;
+        text-decoration: none; transition: color .15s;
+    }}
+    .site-footer .flinks a:hover {{ color: #A6402A; }}
     
     .link-pill {{ 
         text-decoration: none; background: transparent; 
@@ -242,16 +265,22 @@ if st.session_state.page == "Home":
     
     with c1:
         # Profile Image
-        st.markdown('<img class="profile-img" src="https://placehold.co/400x400/FBFAF7/A6402A?text=TL">', unsafe_allow_html=True)
+        st.markdown('<img class="profile-img reveal" src="https://placehold.co/400x400/FBFAF7/A6402A?text=TL">', unsafe_allow_html=True)
         
     with c2:
-        # Name & Title
-        st.markdown('<div class="name-title">Toorese Lasebikan</div>', unsafe_allow_html=True)
+        # Kicker + Name
+        st.markdown("""
+        <div class="reveal">
+            <div class="kicker">Data scientist &amp; AI safety researcher</div>
+            <div class="name-title">Toorese Lasebikan</div>
+            <div class="standfirst">Building applied ML systems by day, and studying how to align language models.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # --- BIO SECTION ---
     st.write("") # Spacer
     st.markdown("""
-    <div style="font-size: 1.1rem; line-height: 1.7; color: #2c2822; margin-top: 20px; max-width: 900px;">
+    <div class="reveal" style="font-size: 1.1rem; line-height: 1.7; color: #2c2822; margin-top: 20px; max-width: 900px; animation-delay: .1s;">
         Hi! I am Toorese. I am a data scientist who currently work in analytics at Amazon Business building metrics and machine learning programs that
         support millions of customers and improve decisions at scale. I earned my masters in Data Analytics and Policy from Carnegie Mellon University
         and my bachelors in Economics. I am especially interested in algorithmic fairness and how AI shapes outcomes in real systems. Outside of work,
@@ -339,6 +368,18 @@ if st.session_state.page == "Home":
     </script>
     """
     st.components.v1.html(_carousel_html, height=420, scrolling=False)
+
+    # --- SITE FOOTER ---
+    st.markdown("""
+    <div class="site-footer reveal">
+        <div class="who"><strong>Toorese Lasebikan</strong>. Data scientist and independent AI safety researcher — applied ML by day, mechanistic interpretability research by night.</div>
+        <div class="flinks">
+            <a href="mailto:toorese@gmail.com">Email</a>
+            <a href="https://github.com/torelash" target="_blank">GitHub</a>
+            <a href="https://linkedin.com/in/toorese-l" target="_blank">LinkedIn</a>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # --- SMART DATA LOADER (COMBINED FIX) ---
