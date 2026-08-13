@@ -46,6 +46,23 @@ def navigate_to(page_name):
     st.rerun()
 
 
+def render_topnav(active=None):
+    """Shared top nav: wordmark (home link) left, page nav right. Renders on every page."""
+    def _cls(name):
+        return ' class="active"' if active == name else ''
+    st.markdown(f"""
+        <div class="topnav">
+            <a href="?page=Home" target="_top" class="wordmark-link"><span class="first">Toorese</span> <span class="rest">Lasebikan</span></a>
+            <div class="pages">
+                <a href="?page=Home" target="_top"{_cls('Home')}>About</a>
+                <a href="?page=Publications" target="_top"{_cls('Publications')}>Publications</a>
+                <a href="?page=Courtside" target="_top"{_cls('Courtside')}>Courtside</a>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+    st.markdown('<hr style="margin-top:0;">', unsafe_allow_html=True)
+
+
 
 
 # --- 3. GLOBAL STYLING & FONTS ---
@@ -245,6 +262,13 @@ st.markdown(f"""
     }}
     .topnav .pages a:hover {{ color: #16130E; }}
     .topnav .pages a.active {{ color: #A6402A; border-bottom-color: #A6402A; }}
+    .topnav a.wordmark-link {{
+        font-family: 'Spectral', serif; font-size: 1.35rem; text-decoration: none; letter-spacing: -.01em;
+    }}
+    .topnav a.wordmark-link .first {{ font-weight: 600; color: #16130E; }}
+    .topnav a.wordmark-link .rest {{ font-weight: 300; color: #34302a; }}
+    .topnav a.wordmark-link:hover .first,
+    .topnav a.wordmark-link:hover .rest {{ color: #A6402A; }}
     /* two-column hero — bio left, photo right */
     .hero-name {{ font-family: 'Spectral', serif; font-size: clamp(2.4rem, 4vw, 3.3rem); line-height: 1.1; margin-bottom: 18px; }}
     .hero-name .first {{ font-weight: 600; color: #16130E; }}
@@ -280,9 +304,9 @@ if st.session_state.page == "Home":
                 <a href="https://nodetalen.xyz" title="Nodetalen — AI site" target="_blank"><span class="glyph">⧉</span></a>
             </div>
             <div class="pages">
-                <a href="#" class="active">About</a>
-                <a href="?page=Publications" target="_blank">Publications</a>
-                <a href="?page=Courtside" target="_blank">Courtside</a>
+                <a href="?page=Home" target="_top" class="active">About</a>
+                <a href="?page=Publications" target="_top">Publications</a>
+                <a href="?page=Courtside" target="_top">Courtside</a>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -313,9 +337,6 @@ if st.session_state.page == "Home":
     nav_cards = [
         {"t": "PROJECTS", "s": "curated", "title": "Curated tools &amp; models", "desc": "A working set of data-science and ML builds — dashboards, prediction models, and applied analytics.", "target": "Projects", "flag": True},
         {"t": "SKILLS", "s": "stack", "title": "Tech stack &amp; expertise", "desc": "Programming, analytics, visualization, and the ML tools behind the work.", "target": "Skills", "flag": False},
-        {"t": "NBA", "s": "analytics", "title": "NBA analytics", "desc": "Shot charts and performance data built on the NBA API.", "target": "NBA", "flag": False},
-        {"t": "WNBA", "s": "analytics", "title": "WNBA analytics", "desc": "Salary cap modeling and shot-chart tools for the league.", "target": "WNBA", "flag": False},
-        {"t": "CONTACT", "s": "connect", "title": "Let's connect", "desc": "For collaborations, questions, or opportunities — get in touch.", "target": "Contact", "flag": False},
     ]
     _cards_html = ""
     for c in nav_cards:
@@ -502,9 +523,7 @@ if st.session_state.page == "Home":
 # 2. PROJECTS
 # ==========================================
 elif st.session_state.page == "Projects":
-    # The "Back" button to return to the dashboard
-    if st.button("← Back to Home", key="back_projects"): 
-        navigate_to("Home")
+    render_topnav()
     
     st.write("") # Spacer
     
@@ -1528,7 +1547,7 @@ elif st.session_state.page == "Projects":
 # 3. SKILLS PAGE
 # ==========================================
 elif st.session_state.page == "Skills":
-    if st.button("← Back Home", key="back_skills"): navigate_to("Home")
+    render_topnav()
     
     # --- PAGE STYLING ---
     st.markdown("""
@@ -1642,7 +1661,7 @@ elif st.session_state.page == "Skills":
 # 4. CONTACT PAGE
 # ==========================================
 elif st.session_state.page == "Contact":
-    if st.button("← Back Home", key="back_contact"): navigate_to("Home")
+    render_topnav()
     
     # --- PAGE STYLING ---
     st.markdown("""
@@ -1746,21 +1765,21 @@ elif st.session_state.page == "Contact":
 
 # 5. HOBBY PAGES (NBA / WNBA)
 elif st.session_state.page == "NBA":
-    if st.button("← Back Home", key="back_nba"): navigate_to("Home")
+    render_topnav(active="Courtside")
     render_nba()
 
 elif st.session_state.page == "WNBA":
-    if st.button("← Back Home", key="back_wnba"): navigate_to("Home")
+    render_topnav(active="Courtside")
     render_wnba()
 
 elif st.session_state.page == "Publications":
-    if st.button("← Back Home", key="back_pubs"): navigate_to("Home")
+    render_topnav(active="Publications")
     st.markdown("<div class='kicker'>Publications</div>", unsafe_allow_html=True)
     st.markdown("<div class='name-title' style='font-size:2.2rem;'>Research &amp; writing</div>", unsafe_allow_html=True)
     st.markdown("<p style='color:#6E6A60; font-size:1.05rem; max-width:56ch;'>Preprints and write-ups will live here. Coming soon.</p>", unsafe_allow_html=True)
 
 elif st.session_state.page == "Courtside":
-    if st.button("← Back Home", key="back_courtside"): navigate_to("Home")
+    render_topnav(active="Courtside")
     st.markdown("<div class='kicker'>Courtside</div>", unsafe_allow_html=True)
     st.markdown("<div class='name-title' style='font-size:2.2rem;'>Basketball, data &amp; play</div>", unsafe_allow_html=True)
     st.markdown("<p style='color:#6E6A60; font-size:1.05rem; max-width:56ch;'>Analytics experiments and a game in the works. Coming soon.</p>", unsafe_allow_html=True)
