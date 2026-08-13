@@ -52,11 +52,11 @@ def render_topnav(active=None):
         return ' class="active"' if active == name else ''
     st.markdown(f"""
         <div class="topnav">
-            <a href="?page=Home" target="_top" class="wordmark-link"><span class="first">Toorese</span> <span class="rest">Lasebikan</span></a>
+            <a href="?page=Home" target="_blank" class="wordmark-link"><span class="first">Toorese</span> <span class="rest">Lasebikan</span></a>
             <div class="pages">
-                <a href="?page=Home" target="_top"{_cls('Home')}>About</a>
-                <a href="?page=Publications" target="_top"{_cls('Publications')}>Publications</a>
-                <a href="?page=Courtside" target="_top"{_cls('Courtside')}>Courtside</a>
+                <a href="?page=Home" target="_blank"{_cls('Home')}>About</a>
+                <a href="?page=Publications" target="_blank"{_cls('Publications')}>Publications</a>
+                <a href="?page=Courtside" target="_blank"{_cls('Courtside')}>Courtside</a>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -304,9 +304,9 @@ if st.session_state.page == "Home":
                 <a href="https://nodetalen.xyz" title="Nodetalen — AI site" target="_blank"><span class="glyph">⧉</span></a>
             </div>
             <div class="pages">
-                <a href="?page=Home" target="_top" class="active">About</a>
-                <a href="?page=Publications" target="_top">Publications</a>
-                <a href="?page=Courtside" target="_top">Courtside</a>
+                <a href="?page=Home" target="_blank" class="active">About</a>
+                <a href="?page=Publications" target="_blank">Publications</a>
+                <a href="?page=Courtside" target="_blank">Courtside</a>
             </div>
         </div>
     """, unsafe_allow_html=True)
