@@ -4,6 +4,7 @@ import pydeck as pdk
 import plotly.express as px
 import plotly.graph_objects as go
 import os
+import base64
 import requests
 import numpy as np
 import random
@@ -46,20 +47,34 @@ def navigate_to(page_name):
     st.rerun()
 
 
+def profile_img_src():
+    """Return a src for the profile photo. Uses a local file if present
+    (profile.jpg/.jpeg/.png in the app folder), else the placeholder."""
+    for fname in ("profile.jpg", "profile.jpeg", "profile.png"):
+        if os.path.exists(fname):
+            mime = "jpeg" if fname.endswith(("jpg", "jpeg")) else "png"
+            with open(fname, "rb") as f:
+                b64 = base64.b64encode(f.read()).decode()
+            return f"data:image/{mime};base64,{b64}"
+    return "https://placehold.co/400x400/FBFAF7/A6402A?text=TL"
+
+
 def render_topnav(active=None):
-    """Shared top nav: wordmark (home link) left, page nav right. Renders on every page."""
-    def _cls(name):
-        return ' class="active"' if active == name else ''
-    st.markdown(f"""
-        <div class="topnav">
-            <a href="?page=Home" target="_blank" class="wordmark-link"><span class="first">Toorese</span> <span class="rest">Lasebikan</span></a>
-            <div class="pages">
-                <a href="?page=Home" target="_blank"{_cls('Home')}>About</a>
-                <a href="?page=Publications" target="_blank"{_cls('Publications')}>Publications</a>
-                <a href="?page=Courtside" target="_blank"{_cls('Courtside')}>Courtside</a>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+    """Shared top nav: wordmark (home link) left, page nav right. Same-tab navigation via st.button."""
+    with st.container(key="topnav-bar"):
+        cols = st.columns([3, 1.1, 1.4, 1.2])
+        with cols[0]:
+            if st.button("Toorese Lasebikan", key="nav_wordmark"):
+                navigate_to("Home")
+        with cols[1]:
+            if st.button("About", key="nav_about"):
+                navigate_to("Home")
+        with cols[2]:
+            if st.button("Publications", key="nav_pubs"):
+                navigate_to("Publications")
+        with cols[3]:
+            if st.button("Courtside", key="nav_courtside"):
+                navigate_to("Courtside")
     st.markdown('<hr style="margin-top:0;">', unsafe_allow_html=True)
 
 
@@ -269,6 +284,24 @@ st.markdown(f"""
     .topnav a.wordmark-link .rest {{ font-weight: 300; color: #34302a; }}
     .topnav a.wordmark-link:hover .first,
     .topnav a.wordmark-link:hover .rest {{ color: #A6402A; }}
+    /* --- nav bar as same-tab Streamlit buttons, styled to look like text links --- */
+    [class*="st-key-topnav-bar"] {{ align-items: baseline !important; }}
+    [class*="st-key-topnav-bar"] div.stButton > button {{
+        background: transparent !important; border: none !important; box-shadow: none !important;
+        min-height: unset !important; height: auto !important; padding: 4px 0 !important; margin: 0 !important;
+        width: auto !important; text-align: left !important; transition: color .15s !important;
+    }}
+    [class*="st-key-topnav-bar"] div.stButton > button:hover {{ background: transparent !important; }}
+    [class*="st-key-topnav-bar"] div.stButton > button p {{
+        font-family: 'Spline Sans Mono', monospace !important; font-size: 13px !important;
+        color: #6E6A60 !important; margin: 0 !important; transition: color .15s !important;
+    }}
+    [class*="st-key-topnav-bar"] div.stButton > button:hover p {{ color: #16130E !important; }}
+    /* wordmark = the nav_wordmark button: serif, larger, bold-first-name feel */
+    [class*="st-key-nav_wordmark"] button p {{
+        font-family: 'Spectral', serif !important; font-size: 1.35rem !important; font-weight: 600 !important; color: #16130E !important;
+    }}
+    [class*="st-key-nav_wordmark"] button:hover p {{ color: #A6402A !important; }}
     /* two-column hero — bio left, photo right */
     .hero-name {{ font-family: 'Spectral', serif; font-size: clamp(2.6rem, 4.5vw, 3.6rem); line-height: 1.08; margin-bottom: 24px; letter-spacing: -.015em; }}
     .hero-name .first {{ font-weight: 600; color: #16130E; }}
@@ -294,22 +327,27 @@ st.markdown(f"""
 # --- 1. HOME PAGE LOGIC ---
 if st.session_state.page == "Home":
     
-    # --- TOP NAV BAR (social icons left, page nav right) ---
-    st.markdown("""
-        <div class="topnav">
-            <div class="socials">
-                <a href="mailto:toorese@gmail.com" title="Email" target="_blank"><svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></a>
-                <a href="https://github.com/torelash" title="GitHub" target="_blank"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.5 9.5 0 015 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0022 12c0-5.52-4.48-10-10-10z"/></svg></a>
-                <a href="https://linkedin.com/in/toorese-l" title="LinkedIn" target="_blank"><svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14zM8.34 17V10.4H6.16V17h2.18zM7.25 9.4a1.27 1.27 0 100-2.54 1.27 1.27 0 000 2.54zM18 17v-3.62c0-1.94-.42-3.43-2.68-3.43-1.09 0-1.82.6-2.12 1.17h-.03V10.4h-2.09V17h2.18v-3.26c0-.86.16-1.7 1.23-1.7 1.05 0 1.07.99 1.07 1.76V17H18z"/></svg></a>
-                <a href="https://nodetalen.xyz" title="Nodetalen — AI site" target="_blank"><span class="glyph">⧉</span></a>
-            </div>
-            <div class="pages">
-                <a href="?page=Home" target="_blank" class="active">About</a>
-                <a href="?page=Publications" target="_blank">Publications</a>
-                <a href="?page=Courtside" target="_blank">Courtside</a>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+    # --- TOP NAV BAR (social icons left, page nav right — same-tab buttons) ---
+    with st.container(key="topnav-bar"):
+        hcols = st.columns([3, 1.1, 1.4, 1.2])
+        with hcols[0]:
+            st.markdown("""
+                <div class="socials" style="padding-top:6px;">
+                    <a href="mailto:toorese@gmail.com" title="Email" target="_blank"><svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></a>
+                    <a href="https://github.com/torelash" title="GitHub" target="_blank"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.5 9.5 0 015 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0022 12c0-5.52-4.48-10-10-10z"/></svg></a>
+                    <a href="https://linkedin.com/in/toorese-l" title="LinkedIn" target="_blank"><svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14zM8.34 17V10.4H6.16V17h2.18zM7.25 9.4a1.27 1.27 0 100-2.54 1.27 1.27 0 000 2.54zM18 17v-3.62c0-1.94-.42-3.43-2.68-3.43-1.09 0-1.82.6-2.12 1.17h-.03V10.4h-2.09V17h2.18v-3.26c0-.86.16-1.7 1.23-1.7 1.05 0 1.07.99 1.07 1.76V17H18z"/></svg></a>
+                    <a href="https://nodetalen.xyz" title="Nodetalen — AI site" target="_blank"><span class="glyph">⧉</span></a>
+                </div>
+            """, unsafe_allow_html=True)
+        with hcols[1]:
+            if st.button("About", key="home_nav_about"):
+                navigate_to("Home")
+        with hcols[2]:
+            if st.button("Publications", key="home_nav_pubs"):
+                navigate_to("Publications")
+        with hcols[3]:
+            if st.button("Courtside", key="home_nav_courtside"):
+                navigate_to("Courtside")
     st.markdown('<hr style="margin-top:0;">', unsafe_allow_html=True)
 
     # --- TWO-COLUMN HERO (bio left, photo right) ---
@@ -328,7 +366,7 @@ if st.session_state.page == "Home":
         """, unsafe_allow_html=True)
 
     with c2:
-        st.markdown('<img class="hero-photo reveal" src="https://placehold.co/400x400/FBFAF7/A6402A?text=TL">', unsafe_allow_html=True)
+        st.markdown(f'<img class="hero-photo reveal" src="{profile_img_src()}">', unsafe_allow_html=True)
 
     st.write("---") # Divider line
 
