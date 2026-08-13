@@ -231,6 +231,30 @@ st.markdown(f"""
         font-family: 'Spline Sans Mono', monospace; font-size: 15px; font-weight: 600;
         letter-spacing: -0.01em; color: #16130E;
     }}
+    /* top nav bar — social icons left, page nav right */
+    .topnav {{ display: flex; justify-content: space-between; align-items: center; padding: 4px 0 18px; }}
+    .topnav .socials {{ display: flex; align-items: center; gap: 18px; }}
+    .topnav .socials a {{ color: #6E6A60; display: inline-flex; transition: color .15s; text-decoration: none; }}
+    .topnav .socials a:hover {{ color: #A6402A; }}
+    .topnav .socials a svg {{ width: 19px; height: 19px; display: block; fill: currentColor; }}
+    .topnav .socials a .glyph {{ font-size: 19px; line-height: 1; }}
+    .topnav .pages {{ display: flex; align-items: baseline; gap: 28px; }}
+    .topnav .pages a {{
+        font-family: 'Spline Sans Mono', monospace; font-size: 13px; color: #6E6A60;
+        text-decoration: none; padding-bottom: 2px; border-bottom: 1px solid transparent; transition: color .15s, border-color .15s;
+    }}
+    .topnav .pages a:hover {{ color: #16130E; }}
+    .topnav .pages a.active {{ color: #A6402A; border-bottom-color: #A6402A; }}
+    /* two-column hero — bio left, photo right */
+    .hero-name {{ font-family: 'Spectral', serif; font-size: clamp(2.4rem, 4vw, 3.3rem); line-height: 1.1; margin-bottom: 18px; }}
+    .hero-name .first {{ font-weight: 600; color: #16130E; }}
+    .hero-name .rest {{ font-weight: 300; color: #34302a; }}
+    .hero-lead {{ font-size: 1.15rem; color: #34302a; line-height: 1.5; margin-bottom: 22px; }}
+    .hero-bio p {{ font-size: 1.02rem; line-height: 1.7; color: #2c2822; margin-bottom: 16px; }}
+    .hero-bio p:last-child {{ margin-bottom: 0; }}
+    .hero-bio a {{ color: #A6402A; text-decoration: none; border-bottom: 1px solid #f3e6e1; }}
+    .hero-bio a:hover {{ border-color: #A6402A; }}
+    .hero-photo {{ width: 100%; max-width: 300px; aspect-ratio: 1; border-radius: 50%; object-fit: cover; border: 1px solid #E2DDD2; }}
 
     /* 4. ACTIVE THEME (Injected) */
     {active_css}
@@ -246,48 +270,43 @@ st.markdown(f"""
 # --- 1. HOME PAGE LOGIC ---
 if st.session_state.page == "Home":
     
-    # --- SITE HEADER (wordmark + right-aligned contact links, mortaling-style) ---
-    hcol1, hcol2 = st.columns([1, 2])
-    with hcol1:
-        st.markdown('<div class="site-header" style="border-bottom:none; margin-bottom:0; padding-bottom:0;"><span class="wordmark">Toorese Lasebikan</span></div>', unsafe_allow_html=True)
-    with hcol2:
-        st.markdown("""
-            <div style="display:flex; justify-content:flex-end; gap:26px;">
-                <a href="mailto:toorese@gmail.com" class="link-pill" style="margin:0;">Email</a>
-                <a href="https://github.com/torelash" target="_blank" class="link-pill" style="margin:0;">GitHub</a>
-                <a href="https://linkedin.com/in/toorese-l" target="_blank" class="link-pill" style="margin:0;">LinkedIn</a>
+    # --- TOP NAV BAR (social icons left, page nav right) ---
+    st.markdown("""
+        <div class="topnav">
+            <div class="socials">
+                <a href="mailto:toorese@gmail.com" title="Email" target="_blank"><svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></a>
+                <a href="https://github.com/torelash" title="GitHub" target="_blank"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.5 9.5 0 015 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0022 12c0-5.52-4.48-10-10-10z"/></svg></a>
+                <a href="https://linkedin.com/in/toorese-l" title="LinkedIn" target="_blank"><svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14zM8.34 17V10.4H6.16V17h2.18zM7.25 9.4a1.27 1.27 0 100-2.54 1.27 1.27 0 000 2.54zM18 17v-3.62c0-1.94-.42-3.43-2.68-3.43-1.09 0-1.82.6-2.12 1.17h-.03V10.4h-2.09V17h2.18v-3.26c0-.86.16-1.7 1.23-1.7 1.05 0 1.07.99 1.07 1.76V17H18z"/></svg></a>
+                <a href="https://nodetalen.xyz" title="Nodetalen — AI site" target="_blank"><span class="glyph">⧉</span></a>
             </div>
-        """, unsafe_allow_html=True)
+            <div class="pages">
+                <a href="#" class="active">About</a>
+                <a href="?page=Publications" target="_blank">Publications</a>
+                <a href="?page=Courtside" target="_blank">Courtside</a>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
     st.markdown('<hr style="margin-top:0;">', unsafe_allow_html=True)
 
-    # --- HEADER SECTION (Using standard Streamlit columns for layout) ---
-    c1, c2 = st.columns([1, 2.5])
-    
+    # --- TWO-COLUMN HERO (bio left, photo right) ---
+    c1, c2 = st.columns([2.3, 1])
+
     with c1:
-        # Profile Image
-        st.markdown('<img class="profile-img reveal" src="https://placehold.co/400x400/FBFAF7/A6402A?text=TL">', unsafe_allow_html=True)
-        
-    with c2:
-        # Kicker + Name
         st.markdown("""
         <div class="reveal">
-            <div class="kicker">Data scientist &amp; AI safety researcher</div>
-            <div class="name-title">Toorese Lasebikan</div>
-            <div class="standfirst">Building applied ML systems by day, and studying how to align language models.</div>
+            <div class="hero-name"><span class="first">Toorese</span> <span class="rest">Lasebikan</span></div>
+            <div class="hero-lead">Building applied ML systems by day, and studying how to align language models.</div>
+            <div class="hero-bio">
+                <p>I am a data scientist who currently works in analytics at Amazon Business, building metrics and machine learning programs that support millions of customers and improve decisions at scale. I earned my master's in Data Analytics and Policy from Carnegie Mellon University and my bachelor's in Economics.</p>
+                <p>I am especially interested in algorithmic fairness and how AI shapes outcomes in real systems. I also run <a href="https://nodetalen.xyz" target="_blank">Nodetalen</a>, a small independent lab studying the internal structure of language models.</p>
+                <p>Outside of work, I love basketball and I enjoy building creative tech projects that explore how data meets everyday life.</p>
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
-    # --- BIO SECTION ---
-    st.write("") # Spacer
-    st.markdown("""
-    <div class="reveal" style="font-size: 1.1rem; line-height: 1.7; color: #2c2822; margin-top: 20px; max-width: 900px; animation-delay: .1s;">
-        Hi! I am Toorese. I am a data scientist who currently work in analytics at Amazon Business building metrics and machine learning programs that
-        support millions of customers and improve decisions at scale. I earned my masters in Data Analytics and Policy from Carnegie Mellon University
-        and my bachelors in Economics. I am especially interested in algorithmic fairness and how AI shapes outcomes in real systems. Outside of work,
-        I love basketball and I enjoy building creative tech projects that explore how data meets everyday life.
-    </div>
-    """, unsafe_allow_html=True)
-    
+    with c2:
+        st.markdown('<img class="hero-photo reveal" src="https://placehold.co/400x400/FBFAF7/A6402A?text=TL">', unsafe_allow_html=True)
+
     st.write("---") # Divider line
 
     # --- NAVIGATION SECTION — self-contained HTML component (own iframe, no Streamlit layout interference) ---
@@ -1733,3 +1752,20 @@ elif st.session_state.page == "NBA":
 elif st.session_state.page == "WNBA":
     if st.button("← Back Home", key="back_wnba"): navigate_to("Home")
     render_wnba()
+
+elif st.session_state.page == "Publications":
+    if st.button("← Back Home", key="back_pubs"): navigate_to("Home")
+    st.markdown("<div class='kicker'>Publications</div>", unsafe_allow_html=True)
+    st.markdown("<div class='name-title' style='font-size:2.2rem;'>Research &amp; writing</div>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#6E6A60; font-size:1.05rem; max-width:56ch;'>Preprints and write-ups will live here. Coming soon.</p>", unsafe_allow_html=True)
+
+elif st.session_state.page == "Courtside":
+    if st.button("← Back Home", key="back_courtside"): navigate_to("Home")
+    st.markdown("<div class='kicker'>Courtside</div>", unsafe_allow_html=True)
+    st.markdown("<div class='name-title' style='font-size:2.2rem;'>Basketball, data &amp; play</div>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#6E6A60; font-size:1.05rem; max-width:56ch;'>Analytics experiments and a game in the works. Coming soon.</p>", unsafe_allow_html=True)
+    cc1, cc2 = st.columns(2)
+    with cc1:
+        if st.button("🏀 NBA Analytics", key="courtside_nba"): navigate_to("NBA")
+    with cc2:
+        if st.button("⛹️ WNBA Analytics", key="courtside_wnba"): navigate_to("WNBA")
