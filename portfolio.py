@@ -265,11 +265,11 @@ st.markdown(f"""
     }}
     /* top nav bar — social icons left, page nav right */
     .topnav {{ display: flex; justify-content: space-between; align-items: center; padding: 4px 0 18px; }}
-    .topnav .socials {{ display: flex; align-items: center; gap: 18px; }}
-    .topnav .socials a {{ color: #6E6A60; display: inline-flex; transition: color .15s; text-decoration: none; }}
-    .topnav .socials a:hover {{ color: #A6402A; }}
-    .topnav .socials a svg {{ width: 19px; height: 19px; display: block; fill: currentColor; }}
-    .topnav .socials a .glyph {{ font-size: 19px; line-height: 1; }}
+    .topnav .socials, .socials {{ display: flex; align-items: center; gap: 18px; }}
+    .topnav .socials a, .socials a {{ color: #6E6A60; display: inline-flex; transition: color .15s; text-decoration: none; }}
+    .topnav .socials a:hover, .socials a:hover {{ color: #A6402A; }}
+    .topnav .socials a svg, .socials a svg {{ width: 19px !important; height: 19px !important; display: block; fill: currentColor; }}
+    .topnav .socials a .glyph, .socials a .glyph {{ font-size: 19px; line-height: 1; }}
     .topnav .pages {{ display: flex; align-items: baseline; gap: 28px; }}
     .topnav .pages a {{
         font-family: 'Spline Sans Mono', monospace; font-size: 13px; color: #6E6A60;
@@ -383,7 +383,7 @@ if st.session_state.page == "Home":
             <div class="rtag"><span class="t">{c['t']}</span><span class="s">{c['s']}</span></div>
             <h3>{c['title']}</h3>
             <p class="desc">{c['desc']}</p>
-            <div class="rlinks"><a href="?page={c['target']}" target="_blank">Open →</a></div>
+            <div class="rlinks"><a href="?page={c['target']}" target="_blank" onclick="try{{window.top.location.href='?page={c['target']}';return false;}}catch(e){{return true;}}">Open →</a></div>
         </div>"""
 
     _carousel_html = f"""
@@ -1833,7 +1833,7 @@ elif st.session_state.page == "Courtside":
             <div class="rtag"><span class="t">{c['t']}</span><span class="s">{c['s']}</span></div>
             <h3>{c['title']}</h3>
             <p class="desc">{c['desc']}</p>
-            <div class="rlinks"><a href="?page={c['target']}" target="_blank">Open →</a></div>
+            <div class="rlinks"><a href="?page={c['target']}" target="_blank" onclick="try{{window.top.location.href='?page={c['target']}';return false;}}catch(e){{return true;}}">Open →</a></div>
         </div>"""
     _court_html = f"""
     <style>
