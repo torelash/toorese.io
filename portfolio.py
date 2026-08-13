@@ -270,11 +270,11 @@ st.markdown(f"""
     .topnav a.wordmark-link:hover .first,
     .topnav a.wordmark-link:hover .rest {{ color: #A6402A; }}
     /* two-column hero — bio left, photo right */
-    .hero-name {{ font-family: 'Spectral', serif; font-size: clamp(2.4rem, 4vw, 3.3rem); line-height: 1.1; margin-bottom: 18px; }}
+    .hero-name {{ font-family: 'Spectral', serif; font-size: clamp(2.6rem, 4.5vw, 3.6rem); line-height: 1.08; margin-bottom: 24px; letter-spacing: -.015em; }}
     .hero-name .first {{ font-weight: 600; color: #16130E; }}
     .hero-name .rest {{ font-weight: 300; color: #34302a; }}
     .hero-lead {{ font-size: 1.15rem; color: #34302a; line-height: 1.5; margin-bottom: 22px; }}
-    .hero-bio p {{ font-size: 1.02rem; line-height: 1.7; color: #2c2822; margin-bottom: 16px; }}
+    .hero-bio p {{ font-size: 1.18rem; line-height: 1.75; color: #2c2822; margin-bottom: 22px; }}
     .hero-bio p:last-child {{ margin-bottom: 0; }}
     .hero-bio a {{ color: #A6402A; text-decoration: none; border-bottom: 1px solid #f3e6e1; }}
     .hero-bio a:hover {{ border-color: #A6402A; }}
@@ -319,7 +319,6 @@ if st.session_state.page == "Home":
         st.markdown("""
         <div class="reveal">
             <div class="hero-name"><span class="first">Toorese</span> <span class="rest">Lasebikan</span></div>
-            <div class="hero-lead">Building applied ML systems by day, and studying how to align language models.</div>
             <div class="hero-bio">
                 <p>I am a data scientist who currently works in analytics at Amazon Business, building metrics and machine learning programs that support millions of customers and improve decisions at scale. I earned my master's in Data Analytics and Policy from Carnegie Mellon University and my bachelor's in Economics.</p>
                 <p>I am especially interested in algorithmic fairness and how AI shapes outcomes in real systems. I also run <a href="https://nodetalen.xyz" target="_blank">Nodetalen</a>, a small independent lab studying the internal structure of language models.</p>
@@ -1782,9 +1781,40 @@ elif st.session_state.page == "Courtside":
     render_topnav(active="Courtside")
     st.markdown("<div class='kicker'>Courtside</div>", unsafe_allow_html=True)
     st.markdown("<div class='name-title' style='font-size:2.2rem;'>Basketball, data &amp; play</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#6E6A60; font-size:1.05rem; max-width:56ch;'>Analytics experiments and a game in the works. Coming soon.</p>", unsafe_allow_html=True)
-    cc1, cc2 = st.columns(2)
-    with cc1:
-        if st.button("🏀 NBA Analytics", key="courtside_nba"): navigate_to("NBA")
-    with cc2:
-        if st.button("⛹️ WNBA Analytics", key="courtside_wnba"): navigate_to("WNBA")
+    st.markdown("<p style='color:#6E6A60; font-size:1.05rem; max-width:56ch; margin-bottom: 10px;'>Analytics experiments and a game in the works.</p>", unsafe_allow_html=True)
+
+    _court_cards = [
+        {"t": "NBA", "s": "analytics", "title": "NBA analytics", "desc": "Shot charts and performance data built on the NBA API.", "target": "NBA", "flag": True},
+        {"t": "WNBA", "s": "analytics", "title": "WNBA analytics", "desc": "Salary cap modeling and shot-chart tools for the league.", "target": "WNBA", "flag": False},
+    ]
+    _cc_html = ""
+    for c in _court_cards:
+        _fc = " flag" if c["flag"] else ""
+        _cc_html += f"""
+        <div class="rcard{_fc}">
+            <div class="rtag"><span class="t">{c['t']}</span><span class="s">{c['s']}</span></div>
+            <h3>{c['title']}</h3>
+            <p class="desc">{c['desc']}</p>
+            <div class="rlinks"><a href="?page={c['target']}" target="_blank">Open →</a></div>
+        </div>"""
+    _court_html = f"""
+    <style>
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ font-family: 'Spectral', Georgia, serif; background: #FBFAF7; }}
+        .hcar {{ display:flex; gap:22px; overflow-x:auto; scroll-snap-type:x mandatory; padding:4px 4px 20px; scrollbar-width:none; }}
+        .hcar::-webkit-scrollbar {{ display:none; }}
+        .rcard {{ flex:0 0 40%; min-width:340px; scroll-snap-align:start; border:1px solid #E2DDD2; padding:30px 30px 24px; display:flex; flex-direction:column; min-height:260px; background:#fdfcfa; }}
+        .rcard.flag {{ border-top:3px solid #A6402A; }}
+        .rtag {{ display:flex; gap:12px; align-items:baseline; margin-bottom:15px; }}
+        .rtag .t {{ font-family:'Spline Sans Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:#A6402A; }}
+        .rtag .s {{ font-family:'Spline Sans Mono',monospace; font-size:11px; color:#6E6A60; }}
+        .rcard h3 {{ font-family:'Spectral',serif; font-size:clamp(21px,2.3vw,26px); font-weight:400; line-height:1.15; letter-spacing:-0.012em; color:#16130E; margin-bottom:13px; }}
+        .rcard .desc {{ color:#2c2822; font-size:15px; line-height:1.5; flex:1; }}
+        .rlinks {{ margin-top:20px; }}
+        .rlinks a {{ font-family:'Spline Sans Mono',monospace; font-size:12px; color:#A6402A; text-decoration:none; border-bottom:1px solid #f3e6e1; padding-bottom:2px; }}
+        .rlinks a:hover {{ border-bottom-color:#A6402A; }}
+    </style>
+    <div class="hcar">{_cc_html}
+    </div>
+    """
+    st.components.v1.html(_court_html, height=340, scrolling=False)
